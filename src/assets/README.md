@@ -1,16 +1,27 @@
 # src/assets
 
-Any assets placed in src/assets will be bundled with application. 
+Any assets placed in src/assets will be bundled with application.
 
 If you intend to reference static assets from your application code then they must be placed in this directory (or anywhere inside of the src directory).
 
-Consider adding additional subdirectories to aid in organization.
+## Current Structure:
 
-Example:
+- src/assets/images/
+  - logo.png (Medical ERP Logo)
+  - hospital.png (Hospital building image for sign-in page)
+  - placeholder.svg (Default avatar placeholder)
 
-- src/assets/images
-  - src/assets/images/webp
-  - src/assets/images/png
-- src/assets/icons
-- src/assets/fonts
-- src/assets/locales
+## Usage:
+
+Import images in components:
+
+```tsx
+import logoImg from "@/assets/images/logo.png";
+import hospitalImg from "@/assets/images/hospital.png";
+```
+
+Or use dynamic imports for better performance:
+
+```tsx
+const logoUrl = new URL("@/assets/images/logo.png", import.meta.url).href;
+```
