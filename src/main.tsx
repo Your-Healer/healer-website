@@ -3,14 +3,13 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import { routeTree } from "./routeTree.gen.ts";
-import "./styles/tailwind.css";
+import "./styles/index.css";
 import './common/i18n'
 
 const router = createRouter({ routeTree });
 
 declare module "@tanstack/react-router" {
 	interface Register {
-		// This infers the type of our router and registers it across your entire project
 		router: typeof router;
 	}
 }
