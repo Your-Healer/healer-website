@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 import { Sidebar } from "@/components/layout/Sidebar/Sidebar"
 import { Header } from "@/components/layout/Header/Header"
@@ -22,11 +22,10 @@ import { Plus, Edit, Trash2, Search } from "lucide-react"
 import { Department } from "@/utils/types"
 import { useNavigate } from "@tanstack/react-router"
 import { mockDepartments } from "@/utils/fake-data"
-
-
+import { useSession } from "@/contexts/SessionProvider"
 
 export default function DepartmentManagement() {
-    const [userRole, setUserRole] = useState<"admin" | "receptionist" | null>(null)
+    const { user } = useSession()
     const [departments, setDepartments] = useState<Department[]>(
         mockDepartments
     )
@@ -34,15 +33,6 @@ export default function DepartmentManagement() {
     const [editingDepartment, setEditingDepartment] = useState<Department | null>(null)
     const [searchTerm, setSearchTerm] = useState("")
     const navigate = useNavigate()
-
-    useEffect(() => {
-        const role = localStorage.getItem("userRole") as "admin" | "receptionist"
-        if (!role || role !== "admin") {
-            navigate({ to: "/" })
-            return
-        }
-        setUserRole(role)
-    }, [navigate])
 
     const handleAddDepartment = () => {
         setEditingDepartment(null)
@@ -64,11 +54,9 @@ export default function DepartmentManagement() {
             d.headOfDepartment.toLowerCase().includes(searchTerm.toLowerCase()),
     )
 
-    if (!userRole) return null
-
     return (
         <div className="flex h-screen bg-gray-50">
-            <Sidebar userRole={userRole} />
+            <Sidebar userRole={user?.role || "admin"} />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <Header />
                 <main className="flex-1 overflow-y-auto p-6">

@@ -21,11 +21,13 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, Edit, Trash2, Search } from "lucide-react"
 import { Appointment } from "@/utils/types"
-
+import { mockAppointments } from "@/utils/fake-data"
 
 export default function AppointmentManagement() {
     const [userRole, setUserRole] = useState<"admin" | "receptionist" | null>(null)
-    const [appointments, setAppointments] = useState<Appointment[]>()
+    const [appointments, setAppointments] = useState<Appointment[]>(
+        mockAppointments
+    )
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null)
     const [searchTerm, setSearchTerm] = useState("")

@@ -8,6 +8,11 @@ export interface User {
 	employeeId: string;
 	avatar?: string;
 	permissions: string[];
+	phone?: string;
+	address?: string;
+	dateOfBirth?: string;
+	joinDate?: string;
+	bio?: string;
 }
 
 export interface Account {
@@ -77,4 +82,20 @@ export interface Staff {
 	department: string;
 	phone: string;
 	status: string;
+}
+
+export interface UserProfile {
+	id: string;
+	firstName: string;
+	lastName: string;
+	email: string;
+	phone: string;
+	address: string;
+	dateOfBirth: string;
+	role: string;
+	department: string;
+	employeeId: string;
+	joinDate: string;
+	bio: string;
+	avatar: string;
 }

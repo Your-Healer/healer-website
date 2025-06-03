@@ -21,9 +21,10 @@ import { Plus, Edit, Trash2, Search } from "lucide-react"
 import { Staff } from "@/utils/types"
 import { mockStaffs } from "@/utils/fake-data"
 import { useNavigate } from "@tanstack/react-router"
+import { useSession } from "@/contexts/SessionProvider"
 
 export default function StaffManagement() {
-    const [userRole, setUserRole] = useState<"admin" | "receptionist" | null>(null)
+    const { user } = useSession()
     const [staff, setStaff] = useState<Staff[]>(mockStaffs)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [editingStaff, setEditingStaff] = useState<Staff | null>(null)
@@ -31,13 +32,11 @@ export default function StaffManagement() {
     const navigate = useNavigate()
 
     useEffect(() => {
-        const role = localStorage.getItem("userRole") as "admin" | "receptionist"
-        if (!role || role !== "admin") {
+        if (!user || user.role !== "admin") {
             navigate({ to: "/" })
             return
         }
-        setUserRole(role)
-    }, [navigate])
+    }, [navigate, user])
 
     const handleAddStaff = () => {
         setEditingStaff(null)
@@ -60,11 +59,9 @@ export default function StaffManagement() {
             s.role.toLowerCase().includes(searchTerm.toLowerCase()),
     )
 
-    if (!userRole) return null
-
     return (
         <div className="flex h-screen bg-gray-50">
-            <Sidebar userRole={userRole} />
+            <Sidebar userRole={user?.role || "admin"} />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <Header />
                 <main className="flex-1 overflow-y-auto p-6">

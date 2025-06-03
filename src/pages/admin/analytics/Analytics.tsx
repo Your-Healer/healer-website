@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Sidebar } from "@/components/layout/Sidebar/Sidebar"
 import { Header } from "@/components/layout/Header/Header"
 import { Button } from "@/components/ui/button"
@@ -11,12 +11,12 @@ import { PDFExportButton } from "@/components/analytics/PdfExportButton"
 import { BarChart3, TrendingUp, Calendar, DollarSign, Users, Activity, Filter } from "lucide-react"
 import { useNavigate } from "@tanstack/react-router"
 import { monthlyData, yearlyData } from "@/utils/fake-data"
+import { useSession } from "@/contexts/SessionProvider"
 
 export default function AnalyticsPage() {
-    const [userRole, setUserRole] = useState<"admin" | "receptionist" | null>(null)
+    const { user } = useSession()
     const [selectedYear, setSelectedYear] = useState("2024")
     const [currentView, setCurrentView] = useState<"monthly" | "yearly">("monthly")
-    const navigate = useNavigate()
 
     const currentYearTotal = monthlyData.reduce(
         (acc, month) => ({
@@ -30,15 +30,6 @@ export default function AnalyticsPage() {
     const lastMonthData = monthlyData[monthlyData.length - 2]
     const currentMonthData = monthlyData[monthlyData.length - 1]
 
-    useEffect(() => {
-        const role = localStorage.getItem("userRole") as "admin" | "receptionist"
-        if (!role || role !== "admin") {
-            navigate({ to: "/" })
-            return
-        }
-        setUserRole(role)
-    }, [navigate])
-
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat("en-US", {
             style: "currency",
@@ -51,11 +42,9 @@ export default function AnalyticsPage() {
         return growth.toFixed(1)
     }
 
-    if (!userRole) return null
-
     return (
         <div className="flex h-screen bg-gray-50">
-            <Sidebar userRole={userRole} />
+            <Sidebar userRole={user?.role || "admin"} />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <Header />
                 <main className="flex-1 overflow-y-auto p-6">

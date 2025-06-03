@@ -83,7 +83,7 @@ export const adminMenuItems: MenuItem[] = [
 
 export const receptionistMenuItems: MenuItem[] = [
 	{
-		href: "/receptionist/dashboard",
+		href: "/receptionist/",
 		label: "Dashboard",
 		icon: Home,
 		permission: null,

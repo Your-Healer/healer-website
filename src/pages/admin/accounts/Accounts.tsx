@@ -20,9 +20,10 @@ import { Plus, Edit, Trash2, Search, Shield } from "lucide-react"
 import { Account } from "@/utils/types"
 import { useNavigate } from "@tanstack/react-router"
 import { mockAccounts } from "@/utils/fake-data"
+import { useSession } from "@/contexts/SessionProvider"
 
 export default function AccountManagement() {
-  const [userRole, setUserRole] = useState<"admin" | "receptionist" | null>(null)
+  const { user } = useSession()
   const [accounts, setAccounts] = useState<Account[]>(
     mockAccounts
   )
@@ -32,13 +33,11 @@ export default function AccountManagement() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const role = localStorage.getItem("userRole") as "admin" | "receptionist"
-    if (!role || role !== "admin") {
+    if (!user?.role || user.role !== "admin") {
       navigate({ to: "/" })
       return
     }
-    setUserRole(role)
-  }, [navigate])
+  }, [navigate, user?.role])
 
   const handleAddAccount = () => {
     setEditingAccount(null)
@@ -61,11 +60,9 @@ export default function AccountManagement() {
       a.role.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
-  if (!userRole) return null
-
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar userRole={userRole} />
+      <Sidebar userRole={user?.role || "admin"} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
         <main className="flex-1 overflow-y-auto p-6">

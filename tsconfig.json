@@ -30,7 +30,7 @@
 			"@/*": ["./src/*"]
 		}
 	},
-	"include": ["src", "e2e"],
+	"include": ["src", "e2e", "src/routes/.ts"],
 	"references": [
 		{ "path": "./tsconfig.node.json" },
 		{
