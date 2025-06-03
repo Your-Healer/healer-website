@@ -10,8 +10,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Download, FileText, BarChart3, Loader2 } from "lucide-react"
-import { PDFExporter } from "@/lib/pdf-export"
-import { useToast } from "@/hooks/use-toast"
+import { PDFExporter } from "@/libs/pdf-export"
+import { toast } from "sonner"
 
 interface MonthlyData {
     month: string
@@ -47,7 +47,6 @@ export function PDFExportButton({
     totalStats,
 }: PDFExportButtonProps) {
     const [isExporting, setIsExporting] = useState(false)
-    const { toast } = useToast()
 
     const handleExportReport = async (type: "monthly" | "yearly") => {
         setIsExporting(true)
@@ -64,15 +63,12 @@ export function PDFExportButton({
 
             await exporter.exportToPDF(exportData)
 
-            toast({
-                title: "Export Successful",
+            toast.success("Export Successful", {
                 description: `${type.charAt(0).toUpperCase() + type.slice(1)} report has been downloaded.`,
             })
         } catch (error) {
-            toast({
-                title: "Export Failed",
+            toast.error("Export Failed", {
                 description: "There was an error generating the PDF report.",
-                variant: "destructive",
             })
         } finally {
             setIsExporting(false)
@@ -85,15 +81,12 @@ export function PDFExportButton({
             const exporter = new PDFExporter()
             await exporter.exportChartToPDF(chartId, title)
 
-            toast({
-                title: "Chart Exported",
-                description: "Chart has been exported to PDF successfully.",
+            toast.success("Chart Exported", {
+                description: `Chart "${title}" has been exported to PDF successfully.`,
             })
         } catch (error) {
-            toast({
-                title: "Export Failed",
-                description: "There was an error exporting the chart.",
-                variant: "destructive",
+            toast.error("Chart Export Failed", {
+                description: `There was an error exporting the chart "${title}".`,
             })
         } finally {
             setIsExporting(false)

@@ -1,11 +1,10 @@
 import { useEffect } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, Navigate } from "@tanstack/react-router";
 import { useSession } from "@/contexts/SessionProvider";
 import { useTranslation } from "react-i18next";
-import type { FunctionComponent } from "../common/types";
 
 export function Home() {
-	const { user, isLoading } = useSession();
+	const { user, isLoading, isAuthenticated } = useSession();
 	const navigate = useNavigate();
 	const { t, i18n } = useTranslation();
 
@@ -16,7 +15,7 @@ export function Home() {
 				if (user.role === "admin") {
 					navigate({ to: "/admin" });
 				} else if (user.role === "receptionist") {
-					navigate({ to: "/receptionist/dashboard" });
+					navigate({ to: "/receptionist" });
 				}
 			} else {
 				// Redirect to sign-in if not authenticated
@@ -33,23 +32,30 @@ export function Home() {
 		}
 	};
 
+	// Show loading while checking authentication
 	if (isLoading) {
 		return (
 			<div className="min-h-screen flex items-center justify-center bg-gray-50">
 				<div className="text-center">
 					<div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-					<p className="mt-4 text-gray-600">Loading...</p>
+					<p className="mt-4 text-gray-600">Checking authentication...</p>
 				</div>
 			</div>
 		);
 	}
 
-	return (
-		<div className="bg-blue-300  font-bold w-screen h-screen flex flex-col justify-center items-center">
-			<p className="text-white text-6xl">{t("home.greeting")}</p>
-			<button type="submit" onClick={onTranslateButtonClick}>
-				translate
-			</button>
-		</div>
-	);
+	// Redirect to sign-in if not authenticated
+	if (!isAuthenticated) {
+		return <Navigate to="/sign-in" replace />;
+	}
+
+	// Role-based dashboard selection
+	if (user?.role === "admin") {
+		return <Navigate to="/admin" replace />;
+	} else if (user?.role === "receptionist") {
+		return <Navigate to="/receptionist" replace />;
+	}
+
+	// Fallback to sign-in if role is not recognized
+	return <Navigate to="/sign-in" replace />;
 }

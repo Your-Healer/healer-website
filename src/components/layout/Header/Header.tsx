@@ -20,10 +20,8 @@ export function Header() {
 
     const handleProfile = () => {
         try {
-            if (user?.role === "admin") {
-                navigate({ to: "/admin/profile" })
-            } else if (user?.role === "receptionist") {
-                navigate({ to: "/receptionist/profile" })
+            if (user?.role === "admin" || user?.role === "receptionist") {
+                navigate({ to: "/profile" })
             }
         } catch (error) {
             console.error('Navigation error:', error)

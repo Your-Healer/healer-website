@@ -37,7 +37,7 @@ export default function SignInPage() {
                     if (role === "admin") {
                         navigate({ to: "/admin" })
                     } else if (role === "receptionist") {
-                        navigate({ to: "/receptionist/dashboard" })
+                        navigate({ to: "/receptionist" })
                     }
                 } catch (navError) {
                     console.error('Navigation error:', navError)
