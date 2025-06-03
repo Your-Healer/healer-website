@@ -1,4 +1,13 @@
-import { User } from "./types";
+import {
+	Account,
+	Appointment,
+	Department,
+	MonthlyData,
+	Patient,
+	Staff,
+	User,
+	YearlyData,
+} from "./types";
 
 export const mockUsers: Record<string, User> = {
 	"admin@hospital.com": {
@@ -48,3 +57,168 @@ export const mockUsers: Record<string, User> = {
 		],
 	},
 };
+
+export const mockAccounts: Account[] = [
+	{
+		id: "1",
+		username: "admin",
+		email: "admin@hospital.com",
+		role: "Admin",
+		status: "Active",
+		lastLogin: "2024-01-15 09:30",
+		createdAt: "2023-01-01",
+	},
+	{
+		id: "2",
+		username: "receptionist1",
+		email: "receptionist@hospital.com",
+		role: "Receptionist",
+		status: "Active",
+		lastLogin: "2024-01-15 08:45",
+		createdAt: "2023-02-15",
+	},
+	{
+		id: "3",
+		username: "dr.smith",
+		email: "john.smith@hospital.com",
+		role: "Doctor",
+		status: "Active",
+		lastLogin: "2024-01-14 16:20",
+		createdAt: "2023-03-10",
+	},
+];
+
+export const monthlyData: MonthlyData[] = [
+	{ month: "Jan", appointments: 245, revenue: 24500, patients: 180 },
+	{ month: "Feb", appointments: 289, revenue: 28900, patients: 210 },
+	{ month: "Mar", appointments: 312, revenue: 31200, patients: 235 },
+	{ month: "Apr", appointments: 298, revenue: 29800, patients: 220 },
+	{ month: "May", appointments: 334, revenue: 33400, patients: 250 },
+	{ month: "Jun", appointments: 356, revenue: 35600, patients: 270 },
+	{ month: "Jul", appointments: 378, revenue: 37800, patients: 285 },
+	{ month: "Aug", appointments: 345, revenue: 34500, patients: 260 },
+	{ month: "Sep", appointments: 367, revenue: 36700, patients: 275 },
+	{ month: "Oct", appointments: 389, revenue: 38900, patients: 290 },
+	{ month: "Nov", appointments: 412, revenue: 41200, patients: 310 },
+	{ month: "Dec", appointments: 398, revenue: 39800, patients: 295 },
+];
+
+export const yearlyData: YearlyData[] = [
+	{ year: "2020", appointments: 2890, revenue: 289000, patients: 2100 },
+	{ year: "2021", appointments: 3245, revenue: 324500, patients: 2350 },
+	{ year: "2022", appointments: 3567, revenue: 356700, patients: 2580 },
+	{ year: "2023", appointments: 3890, revenue: 389000, patients: 2820 },
+	{ year: "2024", appointments: 4123, revenue: 412300, patients: 3050 },
+];
+
+export const mockAppointments: Appointment[] = [
+	{
+		id: "1",
+		patientName: "Alice Johnson",
+		doctorName: "Dr. John Smith",
+		department: "Cardiology",
+		service: "Consultation",
+		date: "2024-01-15",
+		time: "10:00",
+		status: "Confirmed",
+		notes: "Regular checkup",
+	},
+	{
+		id: "2",
+		patientName: "Bob Smith",
+		doctorName: "Dr. Sarah Wilson",
+		department: "Emergency",
+		service: "Emergency Care",
+		date: "2024-01-15",
+		time: "14:30",
+		status: "Pending",
+		notes: "Chest pain",
+	},
+];
+
+export const mockDepartments: Department[] = [
+	{
+		id: "1",
+		name: "Cardiology",
+		description: "Heart and cardiovascular care",
+		headOfDepartment: "Dr. John Smith",
+		location: "Building A, Floor 2",
+		phone: "+1234567890",
+		status: "Active",
+	},
+	{
+		id: "2",
+		name: "Emergency",
+		description: "Emergency medical services",
+		headOfDepartment: "Dr. Sarah Wilson",
+		location: "Building B, Ground Floor",
+		phone: "+1234567891",
+		status: "Active",
+	},
+	{
+		id: "3",
+		name: "Pediatrics",
+		description: "Children's healthcare",
+		headOfDepartment: "Dr. Mike Johnson",
+		location: "Building A, Floor 3",
+		phone: "+1234567892",
+		status: "Active",
+	},
+];
+
+export const mockPatients: Patient[] = [
+	{
+		id: "1",
+		name: "Alice Johnson",
+		email: "alice.j@email.com",
+		phone: "+1234567890",
+		dateOfBirth: "1985-03-15",
+		gender: "Female",
+		address: "123 Main St, City, State",
+		emergencyContact: "+1234567899",
+		medicalHistory: "Hypertension, Diabetes",
+		status: "Active",
+	},
+	{
+		id: "2",
+		name: "Bob Smith",
+		email: "bob.s@email.com",
+		phone: "+1234567891",
+		dateOfBirth: "1978-07-22",
+		gender: "Male",
+		address: "456 Oak Ave, City, State",
+		emergencyContact: "+1234567898",
+		medicalHistory: "No significant history",
+		status: "Active",
+	},
+];
+
+export const mockStaffs: Staff[] = [
+	{
+		id: "1",
+		name: "Dr. John Smith",
+		email: "john.smith@hospital.com",
+		role: "Doctor",
+		department: "Cardiology",
+		phone: "+1234567890",
+		status: "Active",
+	},
+	{
+		id: "2",
+		name: "Sarah Johnson",
+		email: "sarah.j@hospital.com",
+		role: "Nurse",
+		department: "Emergency",
+		phone: "+1234567891",
+		status: "Active",
+	},
+	{
+		id: "3",
+		name: "Mike Wilson",
+		email: "mike.w@hospital.com",
+		role: "Receptionist",
+		department: "Front Desk",
+		phone: "+1234567892",
+		status: "Active",
+	},
+];
