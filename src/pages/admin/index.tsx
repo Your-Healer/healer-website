@@ -1,8 +1,8 @@
-import { Navigate } from "@tanstack/react-router";
+import { Navigate, Outlet } from "@tanstack/react-router";
 import { useSession } from "@/contexts/SessionProvider";
 import AdminDashboard from "@/pages/admin/dashboard/Dashboard";
 
-export default function AdminRoute() {
+export default function AdminLayout() {
     const { isAuthenticated, user, isLoading } = useSession();
 
     if (isLoading) {
@@ -20,5 +20,14 @@ export default function AdminRoute() {
         return <Navigate to="/sign-in" />;
     }
 
-    return <AdminDashboard />;
+    // Check if this is the main /admin route or a nested route
+    const currentPath = window.location.pathname;
+    const isMainAdminRoute = currentPath === "/admin" || currentPath === "/admin/";
+
+    if (isMainAdminRoute) {
+        return <AdminDashboard />;
+    }
+
+    // For nested routes, render the Outlet
+    return <Outlet />;
 }

@@ -2,7 +2,7 @@ import { Navigate } from "@tanstack/react-router";
 import { useSession } from "@/contexts/SessionProvider";
 import ReceptionistDashboard from '@/pages/receptionist/dashboard/Dashboard';
 
-export default function ReceptionistRoute() {
+export default function ReceptionistLayout() {
     const { isAuthenticated, user, isLoading } = useSession();
 
     if (isLoading) {

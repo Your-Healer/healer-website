@@ -82,7 +82,6 @@ export default function PatientManagement() {
                         <h1 className="text-2xl font-bold text-gray-900">Patient Management</h1>
                         <p className="text-gray-600">Manage patient records and information</p>
                     </div>
-
                     <Card>
                         <CardHeader>
                             <div className="flex items-center justify-between">

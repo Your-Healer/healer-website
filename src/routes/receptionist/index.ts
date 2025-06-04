@@ -1,6 +1,15 @@
-import ReceptionistRoute from "@/pages/receptionist";
-import { createFileRoute } from "@tanstack/react-router";
+import ReceptionistLayout from "@/pages/receptionist";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/receptionist/")({
-	component: () => ReceptionistRoute,
+	component: ReceptionistLayout,
+	// beforeLoad: () => {
+	// 	// Check authentication and authorization for admin dashboard
+	// 	const userRole = localStorage.getItem("userRole");
+	// 	const isAuthenticated = localStorage.getItem("authToken");
+
+	// 	if (!isAuthenticated || userRole !== "receptionist") {
+	// 		throw redirect({ to: "/sign-in" });
+	// 	}
+	// },
 });

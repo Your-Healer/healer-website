@@ -15,8 +15,8 @@ const App = ({ router }: AppProps): FunctionComponent => {
 	return (
 		<QueryClientProvider client={queryClient}>
 			<SessionProvider>
+				<Toaster position="bottom-right" richColors />
 				<RouterProvider router={router} />
-				<Toaster position="bottom-right" />
 				{/* <TanStackRouterDevelopmentTools
 				router={router}
 				initialIsOpen={false}
