@@ -62,7 +62,7 @@ export const adminMenuItems: MenuItem[] = [
 		permission: "system.settings",
 	},
 	{
-		href: "/admin/shifts/",
+		href: "/admin/staff/shifts/",
 		label: "Staff Shifts",
 		icon: Clock,
 		permission: "staff.read",

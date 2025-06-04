@@ -1,8 +1,8 @@
-import StaffManagement from "@/pages/admin/staff/Staff";
+import AppointmentManagement from "@/pages/appointments/Appointments";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/admin/staff")({
-	component: StaffManagement,
+export const Route = createFileRoute("/admin/appointments")({
+	component: AppointmentManagement,
 	// beforeLoad: async () => {
 	// 	// Check authentication and authorization for patient management
 	// 	const userRole = localStorage.getItem("userRole");
