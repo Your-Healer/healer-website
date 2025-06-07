@@ -1,9 +1,9 @@
 import { Navigate } from "@tanstack/react-router";
 import { useSession } from "@/contexts/SessionProvider";
-import ReceptionistDashboard from '@/pages/receptionist/dashboard/Dashboard';
+import ReceptionistDashboard from '@/pages/staff/dashboard/Dashboard';
 
-export default function ReceptionistLayout() {
-    const { isAuthenticated, user, isLoading } = useSession();
+export default function StaffLayout() {
+    const { isAuthenticated, account, isLoading } = useSession();
 
     if (isLoading) {
         return (
@@ -16,7 +16,9 @@ export default function ReceptionistLayout() {
         );
     }
 
-    if (!isAuthenticated || user?.role !== "receptionist") {
+    console.log(!isAuthenticated || account?.role?.id !== "2")
+
+    if (!isAuthenticated || account?.role?.id !== "2") {
         return <Navigate to="/sign-in" />;
     }
 

@@ -2,7 +2,7 @@ import { Navigate } from "@tanstack/react-router";
 import { useSession } from "@/contexts/SessionProvider";
 
 export default function Dashboard() {
-    const { isAuthenticated, user, isLoading } = useSession();
+    const { isAuthenticated, user, account, isLoading } = useSession();
 
     // Show loading while checking authentication
     if (isLoading) {
@@ -23,10 +23,10 @@ export default function Dashboard() {
     }
 
     // Role-based dashboard selection
-    if (user?.role === "admin") {
+    if (account?.role?.id === "1") {
         return <Navigate to="/admin" replace />;
-    } else if (user?.role === "receptionist") {
-        return <Navigate to="/receptionist" replace />;
+    } else if (account?.role?.id === "2") {
+        return <Navigate to="/staff" replace />;
     }
 
     // Fallback to sign-in if role is not recognized

@@ -6,7 +6,6 @@ import { SessionProvider } from "./contexts/SessionProvider";
 // import { TanStackRouterDevelopmentTools } from "./components/utils/development-tools/TanStackRouterDevelopmentTools";
 import { Toaster } from "@/components/ui/sonner"
 
-
 const queryClient = new QueryClient();
 
 type AppProps = { router: ReturnType<typeof createRouter> };
@@ -15,14 +14,14 @@ const App = ({ router }: AppProps): FunctionComponent => {
 	return (
 		<QueryClientProvider client={queryClient}>
 			<SessionProvider>
-				<Toaster position="bottom-right" richColors />
-				<RouterProvider router={router} />
 				{/* <TanStackRouterDevelopmentTools
 				router={router}
 				initialIsOpen={false}
 				position="bottom-right"
 				/>
 				<ReactQueryDevtools initialIsOpen={false} /> */}
+				<Toaster position="bottom-right" richColors />
+				<RouterProvider router={router} />
 			</SessionProvider>
 		</QueryClientProvider>
 	);

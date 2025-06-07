@@ -66,7 +66,7 @@ export class PDFExporter {
 		this.pdf.setTextColor(255, 255, 255);
 		this.pdf.setFontSize(20);
 		this.pdf.setFont("helvetica", "bold");
-		this.pdf.text("Medical ERP System", this.margin, 15);
+		this.pdf.text("Your Healer System", this.margin, 15);
 
 		// Subtitle
 		this.pdf.setFontSize(12);
@@ -95,7 +95,7 @@ export class PDFExporter {
 		this.pdf.setFontSize(8);
 		this.pdf.setFont("helvetica", "normal");
 		this.pdf.setTextColor(128, 128, 128);
-		this.pdf.text("Medical ERP Analytics Report", this.margin, footerY);
+		this.pdf.text("Your Healer Analytics Report", this.margin, footerY);
 		this.pdf.text(
 			`Page ${this.pdf.getCurrentPageInfo().pageNumber}`,
 			this.pageWidth - this.margin - 20,

@@ -25,6 +25,13 @@ export default defineConfig({
 	server: {
 		host: true,
 		strictPort: true,
+		proxy: {
+			"/api/v1": {
+				target: "http://localhost:80",
+				changeOrigin: true,
+				rewrite: (path) => path.replace(/^\/api\/v1/, ""),
+			},
+		},
 	},
 	test: {
 		environment: "jsdom",

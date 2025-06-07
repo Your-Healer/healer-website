@@ -9,95 +9,117 @@ import {
 	Home,
 	Hospital,
 	BarChart3,
+	ClipboardPlus,
 } from "lucide-react";
 
 export interface MenuItem {
 	href: string;
 	label: string;
 	icon: any;
-	permission: string | null;
+	role: string;
+	positions: string[] | null;
 }
 
 export const adminMenuItems: MenuItem[] = [
 	{
 		href: "/admin/",
-		label: "Dashboard",
+		label: "Tổng quan",
 		icon: Home,
-		permission: null,
+		role: "1",
+		positions: null,
 	},
 	{
 		href: "/admin/accounts/",
-		label: "Account Management",
+		label: "Quản lý tài khoản",
 		icon: Settings,
-		permission: "user.read",
+		role: "1",
+		positions: null,
 	},
 	{
 		href: "/admin/staff/",
-		label: "Staff Management",
+		label: "Quản lý nhân sự",
 		icon: Users,
-		permission: "staff.read",
+		role: "1",
+		positions: null,
 	},
 	{
 		href: "/admin/patients/",
-		label: "Patient Management",
+		label: "Quản lý bệnh nhân",
 		icon: UserCheck,
-		permission: "patient.read",
+		role: "1",
+		positions: null,
+	},
+	{
+		href: "/admin/medical-records/",
+		label: "Hồ sơ bệnh án",
+		icon: ClipboardPlus,
+		role: "1",
+		positions: null,
 	},
 	{
 		href: "/admin/departments/",
-		label: "Medical Departments",
+		label: "Khoa khám bệnh",
 		icon: Building2,
-		permission: "system.settings",
+		role: "1",
+		positions: null,
 	},
 	{
 		href: "/admin/rooms/",
-		label: "Medical Rooms",
+		label: "Phòng khám bệnh",
 		icon: Hospital,
-		permission: "system.settings",
+		role: "1",
+		positions: null,
 	},
 	{
 		href: "/admin/services/",
-		label: "Medical Services",
+		label: "Dịch vụ y tế",
 		icon: Stethoscope,
-		permission: "system.settings",
+		role: "1",
+		positions: null,
 	},
 	{
 		href: "/admin/staff/shifts/",
-		label: "Staff Shifts",
+		label: "Quản lý ca trực",
 		icon: Clock,
-		permission: "staff.read",
+		role: "1",
+		positions: null,
 	},
 	{
 		href: "/admin/appointments/",
-		label: "Appointments",
+		label: "Quản lý lịch hẹn",
 		icon: Calendar,
-		permission: "appointment.read",
+		role: "1",
+		positions: null,
 	},
 	{
 		href: "/admin/analytics/",
-		label: "Analytics & Reports",
+		label: "Phân tích & Báo cáo",
 		icon: BarChart3,
-		permission: "analytics.read",
+		role: "1",
+		positions: null,
 	},
 ];
 
 export const receptionistMenuItems: MenuItem[] = [
 	{
-		href: "/receptionist/",
-		label: "Dashboard",
+		href: "/staff/",
+		label: "Tổng quan",
 		icon: Home,
-		permission: null,
+		role: "2",
+		positions: ["1", "3", "4"],
 	},
 	{
-		href: "/receptionist/patients",
-		label: "Patient Management",
+		href: "/staff/patients",
+		label: "Quản lý bệnh nhân",
 		icon: UserCheck,
-		permission: "patient.read",
+		role: "3",
+		positions: ["1", "3", "4"],
 	},
 	{
-		href: "/receptionist/shifts",
-		label: "Staff Shifts",
+		href: "/staff/shifts",
+		label: "Quản lý ca trực",
 		icon: Clock,
-		permission: null,
+		role: "3",
+		positions: ["3", "4"],
 	},
 ];

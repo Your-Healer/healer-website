@@ -20,11 +20,11 @@ import {
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, Edit, Trash2, Search } from "lucide-react"
-import { Appointment } from "@/utils/types"
 import { mockAppointments } from "@/utils/fake-data"
+import { Appointment } from "@/models/models"
 
 export default function AppointmentManagement() {
-    const [userRole, setUserRole] = useState<"admin" | "receptionist" | null>(null)
+    const [userRole, setUserRole] = useState<string | null>(null)
     const [appointments, setAppointments] = useState<Appointment[]>(
         mockAppointments
     )
@@ -34,7 +34,7 @@ export default function AppointmentManagement() {
     const navigate = useNavigate()
 
     useEffect(() => {
-        const role = localStorage.getItem("userRole") as "admin" | "receptionist"
+        const role = localStorage.getItem("userRole")
         if (!role || role !== "admin") {
             navigate({ to: "/" })
             return

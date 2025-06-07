@@ -9,7 +9,7 @@ import { UserCheck, Calendar, Clock, Plus, Phone, Mail } from "lucide-react"
 import { useSession, withAuth } from "@/contexts/SessionProvider"
 import { useNavigate } from "@tanstack/react-router"
 
-function ReceptionistDashboard() {
+function StaffDashboard() {
     const { user } = useSession()
     const navigate = useNavigate()
 
@@ -54,7 +54,7 @@ function ReceptionistDashboard() {
         {
             title: "Register New Patient",
             description: "Add a new patient to the system",
-            action: () => navigate({ to: "/receptionist/patients" }),
+            action: () => navigate({ to: "/staff/patients" }),
             icon: UserCheck,
         },
         {
@@ -73,12 +73,12 @@ function ReceptionistDashboard() {
 
     return (
         <div className="flex h-screen bg-gray-50">
-            <Sidebar userRole="receptionist" />
+            <Sidebar userRole="2" />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <Header />
                 <main className="flex-1 overflow-y-auto p-6">
                     <div className="mb-6">
-                        <h1 className="text-2xl font-bold text-gray-900">Welcome back, {user?.firstName}!</h1>
+                        <h1 className="text-2xl font-bold text-gray-900">{`Welcome back, ${user?.firstname} ${user?.lastname}!`}</h1>
                         <p className="text-gray-600">Here's what's happening at the front desk today.</p>
                     </div>
 
@@ -200,4 +200,4 @@ function ReceptionistDashboard() {
     )
 }
 
-export default withAuth(ReceptionistDashboard, "receptionist")
+export default withAuth(StaffDashboard, "2")

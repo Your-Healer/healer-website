@@ -8,13 +8,13 @@ import { Header } from "@/components/layout/Header/Header";
 
 export default function NotFound() {
     const navigate = useNavigate();
-    const { user, isAuthenticated } = useSession();
+    const { user, account, isAuthenticated } = useSession();
 
     const handleGoHome = () => {
-        if (user?.role === "admin") {
+        if (account?.role?.id === "1") {
             navigate({ to: "/admin" });
-        } else if (user?.role === "receptionist") {
-            navigate({ to: "/receptionist" });
+        } else if (account?.role?.id === "2") {
+            navigate({ to: "/staff" });
         } else {
             navigate({ to: "/" });
         }
@@ -28,7 +28,7 @@ export default function NotFound() {
     if (isAuthenticated && user) {
         return (
             <div className="flex h-screen bg-gray-50">
-                <Sidebar userRole={user.role} />
+                <Sidebar userRole={account?.role?.id} />
                 <div className="flex-1 flex flex-col overflow-hidden">
                     <Header />
                     <main className="flex-1 overflow-y-auto p-6">
@@ -70,7 +70,7 @@ export default function NotFound() {
                                                 <ArrowLeft className="mr-2 h-4 w-4" />
                                                 Go Back
                                             </Button>
-                                            {user.role === "admin" && (
+                                            {account?.role?.id === "1" && (
                                                 <>
                                                     <Button
                                                         onClick={() => navigate({ to: "/admin/patients" })}
@@ -90,10 +90,10 @@ export default function NotFound() {
                                                     </Button>
                                                 </>
                                             )}
-                                            {user.role === "receptionist" && (
+                                            {account?.role?.id === "2" && (
                                                 <>
                                                     <Button
-                                                        onClick={() => navigate({ to: "/receptionist/patients" })}
+                                                        onClick={() => navigate({ to: "/staff/patients" })}
                                                         className="w-full justify-start"
                                                         variant="outline"
                                                     >
@@ -101,7 +101,7 @@ export default function NotFound() {
                                                         Patient Management
                                                     </Button>
                                                     <Button
-                                                        onClick={() => navigate({ to: "/receptionist/appointment" })}
+                                                        onClick={() => navigate({ to: "/staff/appointment" })}
                                                         className="w-full justify-start"
                                                         variant="outline"
                                                     >

@@ -7,7 +7,7 @@ If you intend to reference static assets from your application code then they mu
 ## Current Structure:
 
 - src/assets/images/
-  - logo.png (Medical ERP Logo)
+  - logo.png (Your Healer Logo)
   - hospital.png (Hospital building image for sign-in page)
   - placeholder.svg (Default avatar placeholder)
 

@@ -9,8 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PDFExportButton } from "@/components/analytics/PdfExportButton"
 import { BarChart3, TrendingUp, Calendar, DollarSign, Users, Activity, Filter } from "lucide-react"
-import { useNavigate } from "@tanstack/react-router"
-import { monthlyData, yearlyData } from "@/utils/fake-data"
 import { useSession } from "@/contexts/SessionProvider"
 
 export default function AnalyticsPage() {

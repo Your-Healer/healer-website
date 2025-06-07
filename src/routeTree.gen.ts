@@ -11,20 +11,21 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as StaffImport } from './routes/staff'
 import { Route as SignInImport } from './routes/sign-in'
-import { Route as ReceptionistImport } from './routes/receptionist'
 import { Route as ProfileImport } from './routes/profile'
 import { Route as AdminImport } from './routes/admin'
 import { Route as IndexImport } from './routes/index'
-import { Route as ReceptionistIndexImport } from './routes/receptionist/index'
+import { Route as StaffIndexImport } from './routes/staff/index'
 import { Route as AdminIndexImport } from './routes/admin/index'
-import { Route as ReceptionistPatientsImport } from './routes/receptionist/patients'
-import { Route as ReceptionistAppointmentImport } from './routes/receptionist/appointment'
+import { Route as StaffPatientsImport } from './routes/staff/patients'
+import { Route as StaffAppointmentImport } from './routes/staff/appointment'
 import { Route as AdminServicesImport } from './routes/admin/services'
 import { Route as AdminRoomsImport } from './routes/admin/rooms'
 import { Route as AdminPatientsImport } from './routes/admin/patients'
 import { Route as AdminDepartmentsImport } from './routes/admin/departments'
 import { Route as AdminAppointmentsImport } from './routes/admin/appointments'
+import { Route as AdminAppointmentImport } from './routes/admin/appointment'
 import { Route as AdminAnalyticsImport } from './routes/admin/analytics'
 import { Route as AdminAccountsImport } from './routes/admin/accounts'
 import { Route as AdminStaffIndexImport } from './routes/admin/staff/index'
@@ -32,13 +33,13 @@ import { Route as AdminStaffShiftsImport } from './routes/admin/staff/shifts'
 
 // Create/Update Routes
 
-const SignInRoute = SignInImport.update({
-  path: '/sign-in',
+const StaffRoute = StaffImport.update({
+  path: '/staff',
   getParentRoute: () => rootRoute,
 } as any)
 
-const ReceptionistRoute = ReceptionistImport.update({
-  path: '/receptionist',
+const SignInRoute = SignInImport.update({
+  path: '/sign-in',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -57,9 +58,9 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const ReceptionistIndexRoute = ReceptionistIndexImport.update({
+const StaffIndexRoute = StaffIndexImport.update({
   path: '/',
-  getParentRoute: () => ReceptionistRoute,
+  getParentRoute: () => StaffRoute,
 } as any)
 
 const AdminIndexRoute = AdminIndexImport.update({
@@ -67,14 +68,14 @@ const AdminIndexRoute = AdminIndexImport.update({
   getParentRoute: () => AdminRoute,
 } as any)
 
-const ReceptionistPatientsRoute = ReceptionistPatientsImport.update({
+const StaffPatientsRoute = StaffPatientsImport.update({
   path: '/patients',
-  getParentRoute: () => ReceptionistRoute,
+  getParentRoute: () => StaffRoute,
 } as any)
 
-const ReceptionistAppointmentRoute = ReceptionistAppointmentImport.update({
+const StaffAppointmentRoute = StaffAppointmentImport.update({
   path: '/appointment',
-  getParentRoute: () => ReceptionistRoute,
+  getParentRoute: () => StaffRoute,
 } as any)
 
 const AdminServicesRoute = AdminServicesImport.update({
@@ -99,6 +100,11 @@ const AdminDepartmentsRoute = AdminDepartmentsImport.update({
 
 const AdminAppointmentsRoute = AdminAppointmentsImport.update({
   path: '/appointments',
+  getParentRoute: () => AdminRoute,
+} as any)
+
+const AdminAppointmentRoute = AdminAppointmentImport.update({
+  path: '/appointment',
   getParentRoute: () => AdminRoute,
 } as any)
 
@@ -147,18 +153,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileImport
       parentRoute: typeof rootRoute
     }
-    '/receptionist': {
-      id: '/receptionist'
-      path: '/receptionist'
-      fullPath: '/receptionist'
-      preLoaderRoute: typeof ReceptionistImport
-      parentRoute: typeof rootRoute
-    }
     '/sign-in': {
       id: '/sign-in'
       path: '/sign-in'
       fullPath: '/sign-in'
       preLoaderRoute: typeof SignInImport
+      parentRoute: typeof rootRoute
+    }
+    '/staff': {
+      id: '/staff'
+      path: '/staff'
+      fullPath: '/staff'
+      preLoaderRoute: typeof StaffImport
       parentRoute: typeof rootRoute
     }
     '/admin/accounts': {
@@ -173,6 +179,13 @@ declare module '@tanstack/react-router' {
       path: '/analytics'
       fullPath: '/admin/analytics'
       preLoaderRoute: typeof AdminAnalyticsImport
+      parentRoute: typeof AdminImport
+    }
+    '/admin/appointment': {
+      id: '/admin/appointment'
+      path: '/appointment'
+      fullPath: '/admin/appointment'
+      preLoaderRoute: typeof AdminAppointmentImport
       parentRoute: typeof AdminImport
     }
     '/admin/appointments': {
@@ -210,19 +223,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminServicesImport
       parentRoute: typeof AdminImport
     }
-    '/receptionist/appointment': {
-      id: '/receptionist/appointment'
+    '/staff/appointment': {
+      id: '/staff/appointment'
       path: '/appointment'
-      fullPath: '/receptionist/appointment'
-      preLoaderRoute: typeof ReceptionistAppointmentImport
-      parentRoute: typeof ReceptionistImport
+      fullPath: '/staff/appointment'
+      preLoaderRoute: typeof StaffAppointmentImport
+      parentRoute: typeof StaffImport
     }
-    '/receptionist/patients': {
-      id: '/receptionist/patients'
+    '/staff/patients': {
+      id: '/staff/patients'
       path: '/patients'
-      fullPath: '/receptionist/patients'
-      preLoaderRoute: typeof ReceptionistPatientsImport
-      parentRoute: typeof ReceptionistImport
+      fullPath: '/staff/patients'
+      preLoaderRoute: typeof StaffPatientsImport
+      parentRoute: typeof StaffImport
     }
     '/admin/': {
       id: '/admin/'
@@ -231,12 +244,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexImport
       parentRoute: typeof AdminImport
     }
-    '/receptionist/': {
-      id: '/receptionist/'
+    '/staff/': {
+      id: '/staff/'
       path: '/'
-      fullPath: '/receptionist/'
-      preLoaderRoute: typeof ReceptionistIndexImport
-      parentRoute: typeof ReceptionistImport
+      fullPath: '/staff/'
+      preLoaderRoute: typeof StaffIndexImport
+      parentRoute: typeof StaffImport
     }
     '/admin/staff/shifts': {
       id: '/admin/staff/shifts'
@@ -262,6 +275,7 @@ export const routeTree = rootRoute.addChildren({
   AdminRoute: AdminRoute.addChildren({
     AdminAccountsRoute,
     AdminAnalyticsRoute,
+    AdminAppointmentRoute,
     AdminAppointmentsRoute,
     AdminDepartmentsRoute,
     AdminPatientsRoute,
@@ -272,12 +286,12 @@ export const routeTree = rootRoute.addChildren({
     AdminStaffIndexRoute,
   }),
   ProfileRoute,
-  ReceptionistRoute: ReceptionistRoute.addChildren({
-    ReceptionistAppointmentRoute,
-    ReceptionistPatientsRoute,
-    ReceptionistIndexRoute,
-  }),
   SignInRoute,
+  StaffRoute: StaffRoute.addChildren({
+    StaffAppointmentRoute,
+    StaffPatientsRoute,
+    StaffIndexRoute,
+  }),
 })
 
 /* prettier-ignore-end */
@@ -291,8 +305,8 @@ export const routeTree = rootRoute.addChildren({
         "/",
         "/admin",
         "/profile",
-        "/receptionist",
-        "/sign-in"
+        "/sign-in",
+        "/staff"
       ]
     },
     "/": {
@@ -303,6 +317,7 @@ export const routeTree = rootRoute.addChildren({
       "children": [
         "/admin/accounts",
         "/admin/analytics",
+        "/admin/appointment",
         "/admin/appointments",
         "/admin/departments",
         "/admin/patients",
@@ -316,16 +331,16 @@ export const routeTree = rootRoute.addChildren({
     "/profile": {
       "filePath": "profile.ts"
     },
-    "/receptionist": {
-      "filePath": "receptionist.ts",
-      "children": [
-        "/receptionist/appointment",
-        "/receptionist/patients",
-        "/receptionist/"
-      ]
-    },
     "/sign-in": {
       "filePath": "sign-in.ts"
+    },
+    "/staff": {
+      "filePath": "staff.ts",
+      "children": [
+        "/staff/appointment",
+        "/staff/patients",
+        "/staff/"
+      ]
     },
     "/admin/accounts": {
       "filePath": "admin/accounts.ts",
@@ -333,6 +348,10 @@ export const routeTree = rootRoute.addChildren({
     },
     "/admin/analytics": {
       "filePath": "admin/analytics.ts",
+      "parent": "/admin"
+    },
+    "/admin/appointment": {
+      "filePath": "admin/appointment.ts",
       "parent": "/admin"
     },
     "/admin/appointments": {
@@ -355,21 +374,21 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "admin/services.ts",
       "parent": "/admin"
     },
-    "/receptionist/appointment": {
-      "filePath": "receptionist/appointment.ts",
-      "parent": "/receptionist"
+    "/staff/appointment": {
+      "filePath": "staff/appointment.ts",
+      "parent": "/staff"
     },
-    "/receptionist/patients": {
-      "filePath": "receptionist/patients.ts",
-      "parent": "/receptionist"
+    "/staff/patients": {
+      "filePath": "staff/patients.ts",
+      "parent": "/staff"
     },
     "/admin/": {
       "filePath": "admin/index.ts",
       "parent": "/admin"
     },
-    "/receptionist/": {
-      "filePath": "receptionist/index.ts",
-      "parent": "/receptionist"
+    "/staff/": {
+      "filePath": "staff/index.ts",
+      "parent": "/staff"
     },
     "/admin/staff/shifts": {
       "filePath": "admin/staff/shifts.ts",

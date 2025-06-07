@@ -19,12 +19,12 @@ import {
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, Edit, Trash2, Search, Eye } from "lucide-react"
-import { Patient } from "@/utils/types"
 import { useNavigate } from "@tanstack/react-router"
 import { mockPatients } from "@/utils/fake-data"
+import { Patient } from "@/models/models"
 
 export default function PatientManagement() {
-    const [userRole, setUserRole] = useState<"admin" | "receptionist" | null>(null)
+    const [userRole, setUserRole] = useState<string | null>(null)
     const [patients, setPatients] = useState<Patient[]>(
         mockPatients
     )
@@ -36,7 +36,7 @@ export default function PatientManagement() {
     const navigate = useNavigate()
 
     useEffect(() => {
-        const role = localStorage.getItem("userRole") as "admin" | "receptionist"
+        const role = localStorage.getItem("userRole")
         if (!role) {
             navigate({ to: "/" })
             return

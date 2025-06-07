@@ -139,7 +139,7 @@ export default function ProfilePage() {
                             </div>
                         </div>
 
-                        <Tabs defaultValue="personal" className="space-y-6">
+                        <Tabs defaultValue="personal" className="space-y-6 w-full">
                             <TabsList className={`grid w-full grid-cols-${tabsConfig.length}`}>
                                 <TabsTrigger value="personal">Personal Info</TabsTrigger>
                                 {isAdmin && <TabsTrigger value="professional">Professional</TabsTrigger>}
@@ -208,7 +208,7 @@ export default function ProfilePage() {
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor="email">Email Address</Label>
+                                                <Label htmlFor="email">Username / Email Address</Label>
                                                 <div className="relative">
                                                     <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                                                     <Input

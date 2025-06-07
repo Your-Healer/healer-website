@@ -4,7 +4,7 @@ import { useSession } from "@/contexts/SessionProvider";
 import { useTranslation } from "react-i18next";
 
 export function Home() {
-	const { user, isLoading, isAuthenticated } = useSession();
+	const { user, account, isLoading, isAuthenticated } = useSession();
 	const navigate = useNavigate();
 	const { t, i18n } = useTranslation();
 
@@ -12,10 +12,10 @@ export function Home() {
 		if (!isLoading) {
 			if (user) {
 				// Redirect based on user role
-				if (user.role === "admin") {
+				if (account?.role?.id === "1") {
 					navigate({ to: "/admin" });
-				} else if (user.role === "receptionist") {
-					navigate({ to: "/receptionist" });
+				} else if (account?.role?.id === "2") {
+					navigate({ to: "/staff" });
 				}
 			} else {
 				// Redirect to sign-in if not authenticated
@@ -50,10 +50,10 @@ export function Home() {
 	}
 
 	// Role-based dashboard selection
-	if (user?.role === "admin") {
+	if (account?.role?.id === "1") {
 		return <Navigate to="/admin" replace />;
-	} else if (user?.role === "receptionist") {
-		return <Navigate to="/receptionist" replace />;
+	} else if (account?.role?.id === "2") {
+		return <Navigate to="/staff" replace />;
 	}
 
 	// Fallback to sign-in if role is not recognized
