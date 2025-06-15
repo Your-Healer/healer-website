@@ -11,45 +11,29 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as StaffImport } from './routes/staff'
 import { Route as SignInImport } from './routes/sign-in'
-import { Route as ProfileImport } from './routes/profile'
-import { Route as AdminImport } from './routes/admin'
+import { Route as DashboardImport } from './routes/dashboard'
 import { Route as IndexImport } from './routes/index'
-import { Route as StaffIndexImport } from './routes/staff/index'
-import { Route as AdminIndexImport } from './routes/admin/index'
-import { Route as StaffPatientsImport } from './routes/staff/patients'
-import { Route as StaffAppointmentImport } from './routes/staff/appointment'
-import { Route as AdminServicesImport } from './routes/admin/services'
-import { Route as AdminRoomsImport } from './routes/admin/rooms'
-import { Route as AdminPatientsImport } from './routes/admin/patients'
-import { Route as AdminDepartmentsImport } from './routes/admin/departments'
-import { Route as AdminAppointmentsImport } from './routes/admin/appointments'
-import { Route as AdminAppointmentImport } from './routes/admin/appointment'
-import { Route as AdminAnalyticsImport } from './routes/admin/analytics'
-import { Route as AdminAccountsImport } from './routes/admin/accounts'
-import { Route as AdminStaffIndexImport } from './routes/admin/staff/index'
-import { Route as AdminStaffShiftsImport } from './routes/admin/staff/shifts'
+import { Route as StaffsIndexImport } from './routes/staffs/index'
+import { Route as ServicesIndexImport } from './routes/services/index'
+import { Route as RoomsIndexImport } from './routes/rooms/index'
+import { Route as ProfileIndexImport } from './routes/profile/index'
+import { Route as PatientsIndexImport } from './routes/patients/index'
+import { Route as DepartmentsIndexImport } from './routes/departments/index'
+import { Route as AppointmentsIndexImport } from './routes/appointments/index'
+import { Route as AnalyticsIndexImport } from './routes/analytics/index'
+import { Route as AccountsIndexImport } from './routes/accounts/index'
+import { Route as StaffsShiftsImport } from './routes/staffs/shifts'
 
 // Create/Update Routes
-
-const StaffRoute = StaffImport.update({
-  path: '/staff',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const SignInRoute = SignInImport.update({
   path: '/sign-in',
   getParentRoute: () => rootRoute,
 } as any)
 
-const ProfileRoute = ProfileImport.update({
-  path: '/profile',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const AdminRoute = AdminImport.update({
-  path: '/admin',
+const DashboardRoute = DashboardImport.update({
+  path: '/dashboard',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -58,74 +42,54 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const StaffIndexRoute = StaffIndexImport.update({
-  path: '/',
-  getParentRoute: () => StaffRoute,
+const StaffsIndexRoute = StaffsIndexImport.update({
+  path: '/staffs/',
+  getParentRoute: () => rootRoute,
 } as any)
 
-const AdminIndexRoute = AdminIndexImport.update({
-  path: '/',
-  getParentRoute: () => AdminRoute,
+const ServicesIndexRoute = ServicesIndexImport.update({
+  path: '/services/',
+  getParentRoute: () => rootRoute,
 } as any)
 
-const StaffPatientsRoute = StaffPatientsImport.update({
-  path: '/patients',
-  getParentRoute: () => StaffRoute,
+const RoomsIndexRoute = RoomsIndexImport.update({
+  path: '/rooms/',
+  getParentRoute: () => rootRoute,
 } as any)
 
-const StaffAppointmentRoute = StaffAppointmentImport.update({
-  path: '/appointment',
-  getParentRoute: () => StaffRoute,
+const ProfileIndexRoute = ProfileIndexImport.update({
+  path: '/profile/',
+  getParentRoute: () => rootRoute,
 } as any)
 
-const AdminServicesRoute = AdminServicesImport.update({
-  path: '/services',
-  getParentRoute: () => AdminRoute,
+const PatientsIndexRoute = PatientsIndexImport.update({
+  path: '/patients/',
+  getParentRoute: () => rootRoute,
 } as any)
 
-const AdminRoomsRoute = AdminRoomsImport.update({
-  path: '/rooms',
-  getParentRoute: () => AdminRoute,
+const DepartmentsIndexRoute = DepartmentsIndexImport.update({
+  path: '/departments/',
+  getParentRoute: () => rootRoute,
 } as any)
 
-const AdminPatientsRoute = AdminPatientsImport.update({
-  path: '/patients',
-  getParentRoute: () => AdminRoute,
+const AppointmentsIndexRoute = AppointmentsIndexImport.update({
+  path: '/appointments/',
+  getParentRoute: () => rootRoute,
 } as any)
 
-const AdminDepartmentsRoute = AdminDepartmentsImport.update({
-  path: '/departments',
-  getParentRoute: () => AdminRoute,
+const AnalyticsIndexRoute = AnalyticsIndexImport.update({
+  path: '/analytics/',
+  getParentRoute: () => rootRoute,
 } as any)
 
-const AdminAppointmentsRoute = AdminAppointmentsImport.update({
-  path: '/appointments',
-  getParentRoute: () => AdminRoute,
+const AccountsIndexRoute = AccountsIndexImport.update({
+  path: '/accounts/',
+  getParentRoute: () => rootRoute,
 } as any)
 
-const AdminAppointmentRoute = AdminAppointmentImport.update({
-  path: '/appointment',
-  getParentRoute: () => AdminRoute,
-} as any)
-
-const AdminAnalyticsRoute = AdminAnalyticsImport.update({
-  path: '/analytics',
-  getParentRoute: () => AdminRoute,
-} as any)
-
-const AdminAccountsRoute = AdminAccountsImport.update({
-  path: '/accounts',
-  getParentRoute: () => AdminRoute,
-} as any)
-
-const AdminStaffIndexRoute = AdminStaffIndexImport.update({
-  path: '/staff/',
-  getParentRoute: () => AdminRoute,
-} as any)
-
-const AdminStaffShiftsRoute = AdminStaffShiftsImport.update({
-  path: '/staff/shifts',
-  getParentRoute: () => AdminRoute,
+const StaffsShiftsRoute = StaffsShiftsImport.update({
+  path: '/staffs/shifts',
+  getParentRoute: () => rootRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -139,18 +103,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminImport
-      parentRoute: typeof rootRoute
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileImport
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardImport
       parentRoute: typeof rootRoute
     }
     '/sign-in': {
@@ -160,110 +117,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignInImport
       parentRoute: typeof rootRoute
     }
-    '/staff': {
-      id: '/staff'
-      path: '/staff'
-      fullPath: '/staff'
-      preLoaderRoute: typeof StaffImport
+    '/staffs/shifts': {
+      id: '/staffs/shifts'
+      path: '/staffs/shifts'
+      fullPath: '/staffs/shifts'
+      preLoaderRoute: typeof StaffsShiftsImport
       parentRoute: typeof rootRoute
     }
-    '/admin/accounts': {
-      id: '/admin/accounts'
+    '/accounts/': {
+      id: '/accounts/'
       path: '/accounts'
-      fullPath: '/admin/accounts'
-      preLoaderRoute: typeof AdminAccountsImport
-      parentRoute: typeof AdminImport
+      fullPath: '/accounts'
+      preLoaderRoute: typeof AccountsIndexImport
+      parentRoute: typeof rootRoute
     }
-    '/admin/analytics': {
-      id: '/admin/analytics'
+    '/analytics/': {
+      id: '/analytics/'
       path: '/analytics'
-      fullPath: '/admin/analytics'
-      preLoaderRoute: typeof AdminAnalyticsImport
-      parentRoute: typeof AdminImport
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsIndexImport
+      parentRoute: typeof rootRoute
     }
-    '/admin/appointment': {
-      id: '/admin/appointment'
-      path: '/appointment'
-      fullPath: '/admin/appointment'
-      preLoaderRoute: typeof AdminAppointmentImport
-      parentRoute: typeof AdminImport
-    }
-    '/admin/appointments': {
-      id: '/admin/appointments'
+    '/appointments/': {
+      id: '/appointments/'
       path: '/appointments'
-      fullPath: '/admin/appointments'
-      preLoaderRoute: typeof AdminAppointmentsImport
-      parentRoute: typeof AdminImport
+      fullPath: '/appointments'
+      preLoaderRoute: typeof AppointmentsIndexImport
+      parentRoute: typeof rootRoute
     }
-    '/admin/departments': {
-      id: '/admin/departments'
+    '/departments/': {
+      id: '/departments/'
       path: '/departments'
-      fullPath: '/admin/departments'
-      preLoaderRoute: typeof AdminDepartmentsImport
-      parentRoute: typeof AdminImport
+      fullPath: '/departments'
+      preLoaderRoute: typeof DepartmentsIndexImport
+      parentRoute: typeof rootRoute
     }
-    '/admin/patients': {
-      id: '/admin/patients'
+    '/patients/': {
+      id: '/patients/'
       path: '/patients'
-      fullPath: '/admin/patients'
-      preLoaderRoute: typeof AdminPatientsImport
-      parentRoute: typeof AdminImport
+      fullPath: '/patients'
+      preLoaderRoute: typeof PatientsIndexImport
+      parentRoute: typeof rootRoute
     }
-    '/admin/rooms': {
-      id: '/admin/rooms'
+    '/profile/': {
+      id: '/profile/'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/rooms/': {
+      id: '/rooms/'
       path: '/rooms'
-      fullPath: '/admin/rooms'
-      preLoaderRoute: typeof AdminRoomsImport
-      parentRoute: typeof AdminImport
+      fullPath: '/rooms'
+      preLoaderRoute: typeof RoomsIndexImport
+      parentRoute: typeof rootRoute
     }
-    '/admin/services': {
-      id: '/admin/services'
+    '/services/': {
+      id: '/services/'
       path: '/services'
-      fullPath: '/admin/services'
-      preLoaderRoute: typeof AdminServicesImport
-      parentRoute: typeof AdminImport
+      fullPath: '/services'
+      preLoaderRoute: typeof ServicesIndexImport
+      parentRoute: typeof rootRoute
     }
-    '/staff/appointment': {
-      id: '/staff/appointment'
-      path: '/appointment'
-      fullPath: '/staff/appointment'
-      preLoaderRoute: typeof StaffAppointmentImport
-      parentRoute: typeof StaffImport
-    }
-    '/staff/patients': {
-      id: '/staff/patients'
-      path: '/patients'
-      fullPath: '/staff/patients'
-      preLoaderRoute: typeof StaffPatientsImport
-      parentRoute: typeof StaffImport
-    }
-    '/admin/': {
-      id: '/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexImport
-      parentRoute: typeof AdminImport
-    }
-    '/staff/': {
-      id: '/staff/'
-      path: '/'
-      fullPath: '/staff/'
-      preLoaderRoute: typeof StaffIndexImport
-      parentRoute: typeof StaffImport
-    }
-    '/admin/staff/shifts': {
-      id: '/admin/staff/shifts'
-      path: '/staff/shifts'
-      fullPath: '/admin/staff/shifts'
-      preLoaderRoute: typeof AdminStaffShiftsImport
-      parentRoute: typeof AdminImport
-    }
-    '/admin/staff/': {
-      id: '/admin/staff/'
-      path: '/staff'
-      fullPath: '/admin/staff'
-      preLoaderRoute: typeof AdminStaffIndexImport
-      parentRoute: typeof AdminImport
+    '/staffs/': {
+      id: '/staffs/'
+      path: '/staffs'
+      fullPath: '/staffs'
+      preLoaderRoute: typeof StaffsIndexImport
+      parentRoute: typeof rootRoute
     }
   }
 }
@@ -272,26 +194,18 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren({
   IndexRoute,
-  AdminRoute: AdminRoute.addChildren({
-    AdminAccountsRoute,
-    AdminAnalyticsRoute,
-    AdminAppointmentRoute,
-    AdminAppointmentsRoute,
-    AdminDepartmentsRoute,
-    AdminPatientsRoute,
-    AdminRoomsRoute,
-    AdminServicesRoute,
-    AdminIndexRoute,
-    AdminStaffShiftsRoute,
-    AdminStaffIndexRoute,
-  }),
-  ProfileRoute,
+  DashboardRoute,
   SignInRoute,
-  StaffRoute: StaffRoute.addChildren({
-    StaffAppointmentRoute,
-    StaffPatientsRoute,
-    StaffIndexRoute,
-  }),
+  StaffsShiftsRoute,
+  AccountsIndexRoute,
+  AnalyticsIndexRoute,
+  AppointmentsIndexRoute,
+  DepartmentsIndexRoute,
+  PatientsIndexRoute,
+  ProfileIndexRoute,
+  RoomsIndexRoute,
+  ServicesIndexRoute,
+  StaffsIndexRoute,
 })
 
 /* prettier-ignore-end */
@@ -303,100 +217,58 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "__root.ts",
       "children": [
         "/",
-        "/admin",
-        "/profile",
+        "/dashboard",
         "/sign-in",
-        "/staff"
+        "/staffs/shifts",
+        "/accounts/",
+        "/analytics/",
+        "/appointments/",
+        "/departments/",
+        "/patients/",
+        "/profile/",
+        "/rooms/",
+        "/services/",
+        "/staffs/"
       ]
     },
     "/": {
       "filePath": "index.ts"
     },
-    "/admin": {
-      "filePath": "admin.ts",
-      "children": [
-        "/admin/accounts",
-        "/admin/analytics",
-        "/admin/appointment",
-        "/admin/appointments",
-        "/admin/departments",
-        "/admin/patients",
-        "/admin/rooms",
-        "/admin/services",
-        "/admin/",
-        "/admin/staff/shifts",
-        "/admin/staff/"
-      ]
-    },
-    "/profile": {
-      "filePath": "profile.ts"
+    "/dashboard": {
+      "filePath": "dashboard.ts"
     },
     "/sign-in": {
       "filePath": "sign-in.ts"
     },
-    "/staff": {
-      "filePath": "staff.ts",
-      "children": [
-        "/staff/appointment",
-        "/staff/patients",
-        "/staff/"
-      ]
+    "/staffs/shifts": {
+      "filePath": "staffs/shifts.ts"
     },
-    "/admin/accounts": {
-      "filePath": "admin/accounts.ts",
-      "parent": "/admin"
+    "/accounts/": {
+      "filePath": "accounts/index.ts"
     },
-    "/admin/analytics": {
-      "filePath": "admin/analytics.ts",
-      "parent": "/admin"
+    "/analytics/": {
+      "filePath": "analytics/index.ts"
     },
-    "/admin/appointment": {
-      "filePath": "admin/appointment.ts",
-      "parent": "/admin"
+    "/appointments/": {
+      "filePath": "appointments/index.ts"
     },
-    "/admin/appointments": {
-      "filePath": "admin/appointments.ts",
-      "parent": "/admin"
+    "/departments/": {
+      "filePath": "departments/index.ts"
     },
-    "/admin/departments": {
-      "filePath": "admin/departments.ts",
-      "parent": "/admin"
+    "/patients/": {
+      "filePath": "patients/index.ts"
     },
-    "/admin/patients": {
-      "filePath": "admin/patients.ts",
-      "parent": "/admin"
+    "/profile/": {
+      "filePath": "profile/index.ts"
     },
-    "/admin/rooms": {
-      "filePath": "admin/rooms.ts",
-      "parent": "/admin"
+    "/rooms/": {
+      "filePath": "rooms/index.ts"
     },
-    "/admin/services": {
-      "filePath": "admin/services.ts",
-      "parent": "/admin"
+    "/services/": {
+      "filePath": "services/index.ts"
     },
-    "/staff/appointment": {
-      "filePath": "staff/appointment.ts",
-      "parent": "/staff"
-    },
-    "/staff/patients": {
-      "filePath": "staff/patients.ts",
-      "parent": "/staff"
-    },
-    "/admin/": {
-      "filePath": "admin/index.ts",
-      "parent": "/admin"
-    },
-    "/staff/": {
-      "filePath": "staff/index.ts",
-      "parent": "/staff"
-    },
-    "/admin/staff/shifts": {
-      "filePath": "admin/staff/shifts.ts",
-      "parent": "/admin"
-    },
-    "/admin/staff/": {
-      "filePath": "admin/staff/index.ts",
-      "parent": "/admin"
+    "/staffs/": {
+      "filePath": "staffs/index.ts"
     }
   }
 }

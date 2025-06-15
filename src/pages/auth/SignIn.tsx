@@ -11,18 +11,22 @@ import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 import hospitalImage from "@/assets/images/hospital.png"
 import logoImage from '@/assets/images/logo.png';
+import { AuthLoading, ButtonLoading } from "@/components/loading";
 
 export default function SignInPage() {
     const [identifier, setIdentifier] = useState("")
     const [password, setPassword] = useState("")
     const [isSubmitting, setIsSubmitting] = useState(false)
 
-    const { login, isLoading, account, } = useSession()
+    const { login, isLoading, account, isAuthenticated } = useSession()
     const navigate = useNavigate()
 
+    // Redirect if already authenticated
     useEffect(() => {
-        console.log(account)
-    }, [account])
+        if (!isLoading && isAuthenticated) {
+            navigate({ to: "/dashboard" })
+        }
+    }, [isLoading, isAuthenticated, navigate])
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -39,13 +43,7 @@ export default function SignInPage() {
                 const data = result.data
 
                 try {
-                    if (data?.account.role?.id === "1") {
-                        console.log("Navigating to admin dashboard")
-                        navigate({ to: "/admin" })
-                    } else if (data?.account.role?.id === "2") {
-                        console.log("Navigating to staff dashboard")
-                        navigate({ to: "/staff" })
-                    }
+                    navigate({ to: "/dashboard" })
                 } catch (navError) {
                     console.error('Navigation error:', navError)
                 }
@@ -64,14 +62,11 @@ export default function SignInPage() {
     }
 
     if (isLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading...</p>
-                </div>
-            </div>
-        )
+        return <AuthLoading />;
+    }
+
+    if (isAuthenticated) {
+        return null
     }
 
     return (
@@ -139,12 +134,9 @@ export default function SignInPage() {
                                     disabled={!identifier || !password || isSubmitting}
                                 >
                                     {isSubmitting ? (
-                                        <>
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Signing In...
-                                        </>
+                                        <ButtonLoading message="Đang đăng nhập..." />
                                     ) : (
-                                        "Sign In"
+                                        "Đăng Nhập"
                                     )}
                                 </Button>
                             </form>

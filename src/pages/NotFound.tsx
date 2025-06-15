@@ -11,13 +11,7 @@ export default function NotFound() {
     const { user, account, isAuthenticated } = useSession();
 
     const handleGoHome = () => {
-        if (account?.role?.id === "1") {
-            navigate({ to: "/admin" });
-        } else if (account?.role?.id === "2") {
-            navigate({ to: "/staff" });
-        } else {
-            navigate({ to: "/" });
-        }
+        navigate({ to: "/" });
     };
 
     const handleGoBack = () => {
@@ -40,18 +34,18 @@ export default function NotFound() {
                                     </div>
                                     <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
                                     <h2 className="text-3xl font-semibold text-gray-700 mb-4">
-                                        Page Not Found
+                                        Không Tìm Thấy Trang
                                     </h2>
                                     <p className="text-gray-600 mb-8">
-                                        The page you're looking for doesn't exist in the medical system.
-                                        It may have been moved, deleted, or you may have entered an incorrect URL.
+                                        Trang bạn đang tìm kiếm không tồn tại trong hệ thống y tế.
+                                        Có thể trang đã bị di chuyển, xóa hoặc bạn đã nhập sai URL.
                                     </p>
                                 </div>
 
                                 <Card className="shadow-lg">
                                     <CardContent className="p-6">
                                         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                                            What would you like to do?
+                                            Bạn muốn làm gì?
                                         </h3>
                                         <div className="space-y-3">
                                             <Button
@@ -60,7 +54,7 @@ export default function NotFound() {
                                                 variant="default"
                                             >
                                                 <Home className="mr-2 h-4 w-4" />
-                                                Go to Dashboard
+                                                Về Trang Chủ
                                             </Button>
                                             <Button
                                                 onClick={handleGoBack}
@@ -68,45 +62,45 @@ export default function NotFound() {
                                                 variant="outline"
                                             >
                                                 <ArrowLeft className="mr-2 h-4 w-4" />
-                                                Go Back
+                                                Quay Lại
                                             </Button>
                                             {account?.role?.id === "1" && (
                                                 <>
                                                     <Button
-                                                        onClick={() => navigate({ to: "/admin/patients" })}
+                                                        onClick={() => navigate({ to: "/patients" })}
                                                         className="w-full justify-start"
                                                         variant="outline"
                                                     >
                                                         <Search className="mr-2 h-4 w-4" />
-                                                        Patient Management
+                                                        Quản Lý Bệnh Nhân
                                                     </Button>
                                                     <Button
-                                                        onClick={() => navigate({ to: "/admin/appointment" })}
+                                                        onClick={() => navigate({ to: "/appointments" })}
                                                         className="w-full justify-start"
                                                         variant="outline"
                                                     >
                                                         <Search className="mr-2 h-4 w-4" />
-                                                        Appointments
+                                                        Lịch Hẹn
                                                     </Button>
                                                 </>
                                             )}
                                             {account?.role?.id === "2" && (
                                                 <>
                                                     <Button
-                                                        onClick={() => navigate({ to: "/staff/patients" })}
+                                                        onClick={() => navigate({ to: "/patients" })}
                                                         className="w-full justify-start"
                                                         variant="outline"
                                                     >
                                                         <Search className="mr-2 h-4 w-4" />
-                                                        Patient Management
+                                                        Quản Lý Bệnh Nhân
                                                     </Button>
                                                     <Button
-                                                        onClick={() => navigate({ to: "/staff/appointment" })}
+                                                        onClick={() => navigate({ to: "/appointments" })}
                                                         className="w-full justify-start"
                                                         variant="outline"
                                                     >
                                                         <Search className="mr-2 h-4 w-4" />
-                                                        Appointments
+                                                        Lịch Hẹn
                                                     </Button>
                                                 </>
                                             )}
@@ -116,7 +110,7 @@ export default function NotFound() {
 
                                 <div className="text-center">
                                     <p className="text-sm text-gray-500">
-                                        Need help? Contact your system administrator or IT support.
+                                        Cần trợ giúp? Liên hệ quản trị viên hệ thống hoặc bộ phận IT hỗ trợ.
                                     </p>
                                 </div>
                             </div>
@@ -137,10 +131,10 @@ export default function NotFound() {
                     </div>
                     <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
                     <h2 className="text-3xl font-semibold text-gray-700 mb-4">
-                        Page Not Found
+                        Không Tìm Thấy Trang
                     </h2>
                     <p className="text-gray-600 mb-8">
-                        The page you're looking for doesn't exist.
+                        Trang bạn đang tìm kiếm không tồn tại.
                     </p>
                 </div>
 
@@ -153,7 +147,7 @@ export default function NotFound() {
                                 variant="default"
                             >
                                 <Home className="mr-2 h-4 w-4" />
-                                Go to Home
+                                Về Trang Chủ
                             </Button>
                             <Button
                                 onClick={() => navigate({ to: "/sign-in" })}
@@ -161,7 +155,7 @@ export default function NotFound() {
                                 variant="outline"
                             >
                                 <Search className="mr-2 h-4 w-4" />
-                                Sign In
+                                Đăng Nhập
                             </Button>
                         </div>
                     </CardContent>

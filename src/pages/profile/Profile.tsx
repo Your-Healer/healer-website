@@ -16,13 +16,14 @@ import { Separator } from "@/components/ui/separator"
 import { User, Mail, Phone, MapPin, Calendar, Camera, Save, Key, Activity, Clock, Settings } from "lucide-react"
 import { useSession } from "@/contexts/SessionProvider"
 import { useNavigate } from "@tanstack/react-router"
-import { UserProfile } from "@/utils/types"
 
 export default function ProfilePage() {
-    const { user, updateUser, isAuthenticated } = useSession()
+    const { account, updateUser, isAuthenticated } = useSession()
     const [profile, setProfile] = useState<UserProfile | null>(null)
     const [isEditing, setIsEditing] = useState(false)
     const navigate = useNavigate()
+
+    const { account: getMyAccount, loading: getMyAccountLoading } = useGetMyAccount()
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -30,24 +31,18 @@ export default function ProfilePage() {
             return
         }
 
-        if (user) {
+        if (getMyAccount?.user) {
             setProfile({
-                id: user.id,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
-                phone: user.phone || "",
-                address: user.address || "",
-                dateOfBirth: user.dateOfBirth || "",
-                role: user.role === "admin" ? "Administrator" : "Receptionist",
-                department: user.department,
-                employeeId: user.employeeId,
-                joinDate: user.joinDate || "",
-                bio: user.bio || "",
-                avatar: user.avatar || "",
+                id: getMyAccount?.user?.id,
+                firstName: getMyAccount?.user?.firstname,
+                lastName: getMyAccount?.user?.lastname,
+                email: getMyAccount?.email,
+                phone: getMyAccount?.phoneNumber || "",
+                address: getMyAccount?.user?.address || "",
+                role: getMyAccount?.role
             })
         }
-    }, [user, isAuthenticated, navigate])
+    }, [getMyAccount, isAuthenticated, navigate])
 
     const handleSave = () => {
         if (profile && user) {
@@ -75,26 +70,7 @@ export default function ProfilePage() {
         return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
     }
 
-    const getPermissionBadges = () => {
-        if (!user) return []
-
-        const permissionMap: Record<string, { label: string; color: string; icon: any }> = {
-            "user.create": { label: "User Management", color: "text-green-600", icon: User },
-            "analytics.read": { label: "Analytics Access", color: "text-purple-600", icon: Activity },
-            "system.settings": { label: "System Settings", color: "text-orange-600", icon: Settings },
-            "patient.create": { label: "Patient Management", color: "text-blue-600", icon: User },
-            "appointment.create": { label: "Appointment Management", color: "text-indigo-600", icon: Calendar },
-        }
-
-        return user.permissions
-            .filter((permission) => permissionMap[permission])
-            .map((permission) => ({
-                ...permissionMap[permission],
-                permission,
-            }))
-    }
-
-    if (!isAuthenticated || !user || !profile) {
+    if (!isAuthenticated || !account?.role?.id || !profile) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
@@ -102,7 +78,7 @@ export default function ProfilePage() {
         )
     }
 
-    const isAdmin = user.role === "admin"
+    const isAdmin = account?.role?.id === "1"
     const tabsConfig = isAdmin
         ? ["personal", "professional", "security", "activity"]
         : ["personal", "security", "activity"]

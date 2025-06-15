@@ -20,13 +20,14 @@ import {
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, Edit, Trash2, Search } from "lucide-react"
-import { mockAppointments } from "@/utils/fake-data"
-import { Appointment } from "@/models/models"
+import { Appointment, AppointmentStatusLog, BookingTime, DiagnosisSuggestion, MedicalRoom, Patient, User } from "@/models/models"
+import { useSession } from "@/contexts/SessionProvider"
 
 export default function AppointmentManagement() {
+    const { account } = useSession()
     const [userRole, setUserRole] = useState<string | null>(null)
-    const [appointments, setAppointments] = useState<Appointment[]>(
-        mockAppointments
+    const [appointments, setAppointments] = useState<(Appointment & Patient & MedicalRoom & User & BookingTime & DiagnosisSuggestion[] & AppointmentStatusLog[])[]>(
+        []
     )
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null)
@@ -34,12 +35,11 @@ export default function AppointmentManagement() {
     const navigate = useNavigate()
 
     useEffect(() => {
-        const role = localStorage.getItem("userRole")
-        if (!role || role !== "admin") {
+        if (!account?.role || !account.role.id || account.role.id !== "1") {
             navigate({ to: "/" })
             return
         }
-        setUserRole(role)
+        setUserRole(account.role.id)
     }, [navigate])
 
     const handleAddAppointment = () => {

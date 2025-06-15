@@ -91,3 +91,110 @@ export interface GetAppointmentsResponse extends Appointment {
 	medicalRoom: MedicalRoom & Service & Department;
 	bookingTime: BookingTime & MedicalRoomTime;
 }
+
+export interface GetAllStaffs extends Pagination {
+	departmentId?: string;
+	positionId?: string;
+	educationLevel?: "HIGHSCHOOL" | "BACHELOR" | "MASTER" | "DOCTORATE";
+	query?: string;
+}
+
+export interface PatientsFilter {
+	userId?: string;
+	searchTerm?: string;
+	hasAppointments?: boolean;
+	ageRange?: {
+		min: number;
+		max: number;
+	};
+	gender?: string;
+	bloodType?: string;
+}
+
+export interface GetPatientsRequest extends Pagination, PatientsFilter {}
+
+export interface DepartmentFilter {
+	locationId?: string;
+	floor?: number;
+	searchTerm?: string;
+}
+
+export interface GetDepartmentsRequest extends Pagination, DepartmentFilter {}
+
+export interface MedicalRoomFilter {
+	departmentId?: string;
+	serviceId?: string;
+	floor?: number;
+	available?: boolean;
+	searchTerm?: string;
+}
+
+export interface GetMedicalRoomRequest extends Pagination, MedicalRoomFilter {}
+
+export interface CreateMedicalRoomRequest {
+	name: string;
+	departmentId: string;
+	serviceId: string;
+	floor: number;
+}
+
+export interface UpdateMedicalRoomRequest
+	extends Partial<CreateMedicalRoomRequest> {}
+
+export interface GetShiftWorkingRequest extends Pagination {
+	staffId?: string;
+	roomId?: string;
+	departmentId?: string;
+	date?: Date;
+	fromDate?: Date;
+	toDate?: Date;
+	status?: "upcoming" | "active" | "completed";
+}
+
+export interface CreateShiftWorkingRequest {
+	staffId: string;
+	roomId: string;
+	fromTime: Date;
+	toTime: Date;
+}
+
+export interface GetShiftWorkingStatisticsRequest {
+	fromDate?: Date;
+	toDate?: Date;
+	departmentId?: string;
+}
+
+export interface GetShiftWorkingByDateRangRequest extends Pagination {
+	fromDate?: Date;
+	toDate?: Date;
+}
+
+export interface UpdateShiftWorkingRequest {
+	staffId?: string;
+	roomId?: string;
+	fromTime?: Date;
+	toTime?: Date;
+}
+
+export interface DeleteShiftWorkingRequest {
+	id: string;
+}
+
+export interface TimeSlotFilter {
+	roomId?: string;
+	departmentId?: string;
+	date?: Date;
+	fromTime?: Date;
+	toTime?: Date;
+	available?: boolean;
+}
+
+export interface GetTimeSlotsRequest extends Pagination {
+	filter: TimeSlotFilter;
+}
+
+export interface CreateMedicalRoomTimeRequest {
+	roomId: string;
+	fromTime: Date;
+	toTime: Date;
+}

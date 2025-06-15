@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Link, useLocation } from "@tanstack/react-router"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { cn } from "@/utils/utils"
 import { useSession } from "@/contexts/SessionProvider"
 import {
     LogOut,
@@ -11,7 +11,7 @@ import {
 import { adminMenuItems, receptionistMenuItems } from "@/utils/side-bar-menu"
 
 interface SidebarProps {
-    userRole?: string // 1 for admin, 2 for staff
+    userRole?: string
 }
 
 export function Sidebar({ userRole }: SidebarProps) {
@@ -20,6 +20,7 @@ export function Sidebar({ userRole }: SidebarProps) {
     const { logout, checkPosition } = useSession()
 
     const menuItems = userRole == "1" ? adminMenuItems : receptionistMenuItems
+
     const filteredMenuItems = menuItems.filter((item) => {
         return checkPosition(item.positions)
     })
@@ -40,7 +41,6 @@ export function Sidebar({ userRole }: SidebarProps) {
                     {filteredMenuItems.map((item) => {
                         const Icon = item.icon
                         const isActive = location.pathname === item.href
-
                         return (
                             <li key={item.href}>
                                 <Link

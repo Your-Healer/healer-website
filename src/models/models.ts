@@ -215,31 +215,78 @@ export interface AccountWithDetails extends Account {
 }
 
 export interface AppointmentWithDetails extends Appointment {
-	patientName?: string;
-	doctorName?: string;
-	department?: string;
-	service?: string;
-	date?: string;
-	time?: string;
-	notes?: string;
+	medicalRoom: MedicalRoomWithDetails;
+	user: UserWithDetails;
+	patient: PatientWithDetails;
+	bookingTime: BookingTimeWithDetails;
+
+	suggestions: DiagnosisSuggestionWithDetails[];
+	statusLogs: AppointmentStatusLogWithDetails[];
+}
+
+export interface PositionStaffWithDetail extends PositionStaff {
+	position: Position;
+}
+
+export interface StaffOnDepartmentWithDetail extends StaffOnDepartment {
+	department: DepartmentWithDetails;
 }
 
 export interface StaffWithDetails extends Staff {
-	name?: string;
-	email?: string;
-	role?: string;
-	department?: string;
-	phone?: string;
-	status?: string;
+	account: AccountWithDetails;
+	positions: PositionStaffWithDetail[];
+	departments: StaffOnDepartmentWithDetail[];
+	shifts: ShiftWorkingDetails[];
 }
 
 export interface PatientWithDetails extends Patient {
-	name?: string;
-	email?: string;
-	phone?: string;
-	dateOfBirth?: string;
-	gender?: string;
-	emergencyContact?: string;
-	medicalHistory?: string;
-	status?: string;
+	user: UserWithDetails;
+	BookingTime: BookingTimeWithDetails[];
+	Appointment: AppointmentWithDetails[];
+}
+
+export interface DepartmentWithDetails extends Department {
+	location?: LocationWithDetails;
+	staffAssignments?: StaffOnDepartment[];
+}
+
+export interface LocationWithDetails extends Location {
+	departments?: DepartmentWithDetails[];
+}
+
+export interface ShiftWorkingDetails extends ShiftWorking {
+	staff?: StaffWithDetails;
+	room?: MedicalRoomWithDetails;
+}
+export interface MedicalRoomWithDetails extends MedicalRoom {
+	department: DepartmentWithDetails;
+	service: ServiceWithDetails;
+	times: MedicalRoomTimeWithDetails[];
+	appointments: AppointmentWithDetails[];
+	shifts: ShiftWorkingDetails[];
+}
+
+export interface MedicalRoomTimeWithDetails extends MedicalRoomTime {
+	room: MedicalRoomWithDetails;
+	bookings: BookingTimeWithDetails[];
+}
+
+export interface ServiceWithDetails extends Service {
+	medicalRooms: MedicalRoomWithDetails[];
+}
+
+export interface BookingTimeWithDetails extends BookingTime {
+	medicalRoomTime: MedicalRoomTimeWithDetails;
+	user: UserWithDetails;
+	patient: PatientWithDetails;
+	appointment: AppointmentWithDetails[];
+	Account?: AccountWithDetails;
+}
+
+export interface DiagnosisSuggestionWithDetails extends DiagnosisSuggestion {
+	appointment: AppointmentWithDetails;
+}
+
+export interface AppointmentStatusLogWithDetails extends AppointmentStatusLog {
+	appointment: AppointmentWithDetails;
 }

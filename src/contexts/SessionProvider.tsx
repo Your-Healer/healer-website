@@ -1,9 +1,10 @@
 "use client"
 import type React from "react"
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
-import { LoggedInAccount, LoggedInStaff, LoggedInUser, Position, Role, User } from "@/models/models"
+import { LoggedInAccount, LoggedInStaff, LoggedInUser } from "@/models/models"
 import api from "@/api/axios"
 import { LoginEmailRequest, LoginResponse, LoginUsernameRequest } from "@/utils/types"
+import { AuthLoading } from "@/components/loading"
 
 interface SessionContextType {
     account: LoggedInAccount | null
@@ -39,16 +40,22 @@ export function SessionProvider({ children }: SessionProviderProps) {
             setIsLoading(true)
 
             const storedUser = localStorage.getItem("user")
+            const storedAccount = localStorage.getItem("account")
+            const storedStaff = localStorage.getItem("staff")
             const storedToken = localStorage.getItem("authToken")
 
             if (storedUser && storedToken) {
-                const userData = JSON.parse(storedUser) as any;
+                const userData = JSON.parse(storedUser) as LoggedInUser;
+                const accountData = storedAccount ? JSON.parse(storedAccount) as LoggedInAccount : null;
+                const staffData = storedStaff ? JSON.parse(storedStaff) as LoggedInStaff : null;
 
                 const tokenData = JSON.parse(atob(storedToken.split(".")[1] || "{}")) as any;
                 const isTokenValid = tokenData.exp > Date.now() / 1000
 
                 if (isTokenValid) {
                     setUser(userData)
+                    setAccount(accountData)
+                    setStaff(staffData)
                 } else {
                     clearSession()
                 }
@@ -83,6 +90,8 @@ export function SessionProvider({ children }: SessionProviderProps) {
 
             const loginResultData = loginResult.data
 
+            console.log(loginResultData)
+
             localStorage.setItem("user", JSON.stringify(loginResultData.user || {}))
             localStorage.setItem("staff", JSON.stringify(loginResultData.staff || {}))
             localStorage.setItem("account", JSON.stringify(loginResultData.account || {}))
@@ -115,12 +124,14 @@ export function SessionProvider({ children }: SessionProviderProps) {
     const clearSession = () => {
         localStorage.removeItem("user")
         localStorage.removeItem("account")
+        localStorage.removeItem("staff")
         localStorage.removeItem("authToken")
         localStorage.removeItem("accountRole")
         localStorage.removeItem("userEmail")
-        localStorage.removeItem("staff")
         localStorage.removeItem("staffPositions")
         setUser(null)
+        setAccount(null)
+        setStaff(null)
     }
 
     const updateUser = (userData: Partial<LoggedInUser>) => {
@@ -132,8 +143,8 @@ export function SessionProvider({ children }: SessionProviderProps) {
     }
 
     const checkPosition = (positionIds: string[] | null): boolean => {
-        if (!staff || !staff.positions) return false
         if (!positionIds || positionIds.length === 0) return true
+        if (!staff || !staff.positions) return false
         return staff.positions.some(pos => positionIds.includes(pos.positionId))
     }
 
@@ -142,7 +153,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
         account,
         staff,
         isLoading,
-        isAuthenticated: !!user,
+        isAuthenticated: !!user && !!account,
         login,
         logout,
         updateUser,
@@ -186,11 +197,7 @@ export function withAuth<P extends object>(
         }, [account, staff, isLoading, isAuthenticated])
 
         if (isLoading) {
-            return (
-                <div className="min-h-screen flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-                </div>
-            )
+            return <AuthLoading />;
         }
 
         if (!isAuthenticated) {
