@@ -1,6 +1,6 @@
 import api from "@/api/axios";
 import { AppointmentWithDetails } from "@/models/models";
-import { AppointmentFilter, GetAppointmentsRequest, PaginationResponse } from "@/utils/types";
+import { AppointmentFilter, GetAppointmentsRequest, GetPatientAppointmentHistoryRequest, PaginationResponse } from "@/utils/types";
 import { useEffect, useState } from "react";
 
 export const getAppointments = (params: GetAppointmentsRequest) => {
@@ -82,3 +82,34 @@ export const getAppointmentStatistics = (params: AppointmentFilter) => {
 }
 
 // export const createNewAppointment = async(appointment)
+
+export const getPatientAppointmentHistory = (patientId: string, params: GetPatientAppointmentHistoryRequest) => {
+    const [appointments, setAppointments] = useState<AppointmentWithDetails[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [pagination, setPagination] = useState<PaginationResponse<AppointmentWithDetails>['meta'] | null>(null);
+
+    const fetchAppointments = async () => {
+        setLoading(true);
+        try {
+            const res = await api.get<PaginationResponse<AppointmentWithDetails>>(`/appointments/${patientId}/history`, {
+                params
+            });
+            console.log("Patient appointment history fetched successfully:", res.data);
+            const appointmentsData = res.data.data || [];
+            setAppointments(appointmentsData);
+            setPagination(res.data.meta);
+        } catch (err) {
+            console.error("Error fetching patient appointment history:", err);
+            setAppointments([]);
+            setPagination(null);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        fetchAppointments();
+    }, [JSON.stringify(params)])
+
+    return { appointments, loading, pagination, refetch: fetchAppointments };
+}
