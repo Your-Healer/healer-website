@@ -432,12 +432,6 @@ export default function AccountManagement() {
                   )}
                 </>
               )}
-
-              {getAccountsResult?.length === 0 && !getAccountsLoading && (
-                <div className="text-center py-8 text-gray-500">
-                  Không tìm thấy tài khoản nào
-                </div>
-              )}
             </CardContent>
           </Card>
 
