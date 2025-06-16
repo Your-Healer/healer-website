@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Link, useLocation } from "@tanstack/react-router"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { cn } from "@/utils/utils"
 import { useSession } from "@/contexts/SessionProvider"
 import {
     LogOut,
@@ -11,16 +11,19 @@ import {
 import { adminMenuItems, receptionistMenuItems } from "@/utils/side-bar-menu"
 
 interface SidebarProps {
-    userRole: "admin" | "receptionist"
+    userRole?: string
 }
 
 export function Sidebar({ userRole }: SidebarProps) {
     const [isCollapsed, setIsCollapsed] = useState(false)
     const location = useLocation()
-    const { logout, checkPermission } = useSession()
+    const { logout, checkPosition } = useSession()
 
-    const menuItems = userRole === "admin" ? adminMenuItems : receptionistMenuItems
-    const filteredMenuItems = menuItems.filter((item) => !item.permission || checkPermission(item.permission))
+    const menuItems = userRole == "1" ? adminMenuItems : receptionistMenuItems
+
+    const filteredMenuItems = menuItems.filter((item) => {
+        return checkPosition(item.positions)
+    })
 
     return (
         <div className={cn("bg-white border-r border-gray-200 h-screen flex flex-col", isCollapsed ? "w-16" : "w-64")}>
@@ -38,7 +41,6 @@ export function Sidebar({ userRole }: SidebarProps) {
                     {filteredMenuItems.map((item) => {
                         const Icon = item.icon
                         const isActive = location.pathname === item.href
-
                         return (
                             <li key={item.href}>
                                 <Link

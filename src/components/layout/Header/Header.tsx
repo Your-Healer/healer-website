@@ -15,12 +15,12 @@ import { useSession } from "@/contexts/SessionProvider"
 import logoImage from "@/assets/images/logo.png"
 
 export function Header() {
-    const { user, logout } = useSession()
+    const { account, logout, user } = useSession()
     const navigate = useNavigate()
 
     const handleProfile = () => {
         try {
-            if (user?.role === "admin" || user?.role === "receptionist") {
+            if (account?.role?.id === "1" || account?.role?.id === "2") {
                 navigate({ to: "/profile" })
             }
         } catch (error) {
@@ -32,13 +32,13 @@ export function Header() {
         return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
     }
 
-    if (!user) return null
+    if (!account || !user) return null
 
     return (
         <header className="bg-white border-b border-gray-200 px-6 py-4">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <img src={logoImage} alt="Medical ERP Logo" className="h-8 w-auto" />
+                    <img src={logoImage} alt="Your Healer Logo" className="h-8 w-auto" />
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                         <Input placeholder="Search..." className="pl-10 w-80" />
@@ -54,8 +54,8 @@ export function Header() {
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                                 <Avatar className="h-8 w-8">
-                                    <AvatarImage src={user.avatar} alt={`${user.firstName} ${user.lastName}`} />
-                                    <AvatarFallback>{getInitials(user.firstName, user.lastName)}</AvatarFallback>
+                                    <AvatarImage src={account?.avatar} alt={`${user.firstname} ${user.lastname}`} />
+                                    <AvatarFallback>{getInitials(user.firstname, user.lastname)}</AvatarFallback>
                                 </Avatar>
                             </Button>
                         </DropdownMenuTrigger>
@@ -63,12 +63,11 @@ export function Header() {
                             <DropdownMenuLabel className="font-normal">
                                 <div className="flex flex-col space-y-1">
                                     <p className="text-sm font-medium leading-none">
-                                        {user.firstName} {user.lastName}
+                                        {user.firstname} {user.lastname}
                                     </p>
-                                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-                                    <p className="text-xs leading-none text-muted-foreground">
+                                    {/* <p className="text-xs leading-none text-muted-foreground">
                                         {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                                    </p>
+                                    </p> */}
                                 </div>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />

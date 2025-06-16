@@ -1,18 +1,21 @@
 "use client"
-
 import type React from "react"
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
-import { User } from "../utils/types"
-import { mockUsers } from "../utils/fake-data"
+import { LoggedInAccount, LoggedInStaff, LoggedInUser } from "@/models/models"
+import api from "@/api/axios"
+import { LoginEmailRequest, LoginResponse, LoginUsernameRequest } from "@/utils/types"
+import { AuthLoading } from "@/components/loading"
 
 interface SessionContextType {
-    user: User | null
+    account: LoggedInAccount | null
+    user: LoggedInUser | null
+    staff: LoggedInStaff | null
     isLoading: boolean
     isAuthenticated: boolean
-    login: (email: string, password: string, role: string) => Promise<boolean>
+    login: (identifier: string, password: string) => Promise<{ success: boolean, data: LoginResponse | null }>
     logout: () => void
-    updateUser: (userData: Partial<User>) => void
-    checkPermission: (permission: string) => boolean
+    updateUser: (userData: Partial<LoggedInUser>) => void
+    checkPosition: (positionIds: string[] | null) => boolean
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined)
@@ -22,7 +25,9 @@ interface SessionProviderProps {
 }
 
 export function SessionProvider({ children }: SessionProviderProps) {
-    const [user, setUser] = useState<User | null>(null)
+    const [user, setUser] = useState<LoggedInUser | null>(null)
+    const [account, setAccount] = useState<LoggedInAccount | null>(null)
+    const [staff, setStaff] = useState<LoggedInStaff | null>(null)
     const [isLoading, setIsLoading] = useState(true)
 
     // Initialize session on mount
@@ -35,16 +40,22 @@ export function SessionProvider({ children }: SessionProviderProps) {
             setIsLoading(true)
 
             const storedUser = localStorage.getItem("user")
+            const storedAccount = localStorage.getItem("account")
+            const storedStaff = localStorage.getItem("staff")
             const storedToken = localStorage.getItem("authToken")
 
             if (storedUser && storedToken) {
-                const userData = JSON.parse(storedUser) as any;
+                const userData = JSON.parse(storedUser) as LoggedInUser;
+                const accountData = storedAccount ? JSON.parse(storedAccount) as LoggedInAccount : null;
+                const staffData = storedStaff ? JSON.parse(storedStaff) as LoggedInStaff : null;
 
                 const tokenData = JSON.parse(atob(storedToken.split(".")[1] || "{}")) as any;
                 const isTokenValid = tokenData.exp > Date.now() / 1000
 
                 if (isTokenValid) {
                     setUser(userData)
+                    setAccount(accountData)
+                    setStaff(staffData)
                 } else {
                     clearSession()
                 }
@@ -57,54 +68,50 @@ export function SessionProvider({ children }: SessionProviderProps) {
         }
     }
 
-    const login = async (email: string, password: string, role: string): Promise<boolean> => {
+    const login = async (identifier: string, password: string): Promise<{ success: boolean, data: LoginResponse | null }> => {
         try {
             setIsLoading(true)
-
             await new Promise((resolve) => setTimeout(resolve, 1000))
 
-            const mockUser = mockUsers[email]
+            const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier)
 
-            if (!mockUser || mockUser.role !== role) {
-                return false
+            let data: LoginEmailRequest | LoginUsernameRequest;
+            if (isEmail) {
+                data = { email: identifier, password }
+            }
+            else {
+                data = { username: identifier, password }
             }
 
-            const validPasswords: Record<string, string> = {
-                "admin@hospital.com": "admin123",
-                "receptionist@hospital.com": "rec123",
+            const loginResult = await api.post<LoginResponse, { data: LoginResponse }, LoginEmailRequest | LoginUsernameRequest>(
+                isEmail ? "/auth/login/email" : '/auth/login/username',
+                data
+            )
+
+            const loginResultData = loginResult.data
+
+            console.log(loginResultData)
+
+            localStorage.setItem("user", JSON.stringify(loginResultData.user || {}))
+            localStorage.setItem("staff", JSON.stringify(loginResultData.staff || {}))
+            localStorage.setItem("account", JSON.stringify(loginResultData.account || {}))
+            localStorage.setItem("authToken", loginResultData.token)
+            localStorage.setItem("accountRole", loginResultData.account.role?.id || "3")
+            localStorage.setItem("staffPositions", JSON.stringify(loginResultData.staff?.positions || []))
+
+            setUser(loginResultData.user || null)
+            setAccount(loginResultData.account || null)
+            setStaff(loginResultData.staff || null)
+            return {
+                success: true,
+                data: loginResultData
             }
-
-            if (validPasswords[email] !== password) {
-                return false
-            }
-
-            // Create mock JWT token (in real app, this would come from backend)
-            const tokenPayload = {
-                userId: mockUser.id,
-                email: mockUser.email,
-                role: mockUser.role,
-                exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24 hours
-                iat: Math.floor(Date.now() / 1000),
-            }
-
-            const mockToken =
-                btoa(JSON.stringify({ alg: "HS256", typ: "JWT" })) +
-                "." +
-                btoa(JSON.stringify(tokenPayload)) +
-                "." +
-                btoa("mock-signature")
-
-            // Store session data
-            localStorage.setItem("user", JSON.stringify(mockUser))
-            localStorage.setItem("authToken", mockToken)
-            localStorage.setItem("userRole", role) // Keep for backward compatibility
-            localStorage.setItem("userEmail", email) // Keep for backward compatibility
-
-            setUser(mockUser)
-            return true
         } catch (error) {
             console.error("Login error:", error)
-            return false
+            return {
+                success: false,
+                data: null
+            }
         } finally {
             setIsLoading(false)
         }
@@ -116,13 +123,18 @@ export function SessionProvider({ children }: SessionProviderProps) {
 
     const clearSession = () => {
         localStorage.removeItem("user")
+        localStorage.removeItem("account")
+        localStorage.removeItem("staff")
         localStorage.removeItem("authToken")
-        localStorage.removeItem("userRole")
+        localStorage.removeItem("accountRole")
         localStorage.removeItem("userEmail")
+        localStorage.removeItem("staffPositions")
         setUser(null)
+        setAccount(null)
+        setStaff(null)
     }
 
-    const updateUser = (userData: Partial<User>) => {
+    const updateUser = (userData: Partial<LoggedInUser>) => {
         if (user) {
             const updatedUser = { ...user, ...userData }
             setUser(updatedUser)
@@ -130,19 +142,22 @@ export function SessionProvider({ children }: SessionProviderProps) {
         }
     }
 
-    const checkPermission = (permission: string): boolean => {
-        if (!user) return false
-        return user.permissions.includes(permission)
+    const checkPosition = (positionIds: string[] | null): boolean => {
+        if (!positionIds || positionIds.length === 0) return true
+        if (!staff || !staff.positions) return false
+        return staff.positions.some(pos => positionIds.includes(pos.positionId))
     }
 
     const value: SessionContextType = {
         user,
+        account,
+        staff,
         isLoading,
-        isAuthenticated: !!user,
+        isAuthenticated: !!user && !!account,
         login,
         logout,
         updateUser,
-        checkPermission,
+        checkPosition
     }
 
     return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
@@ -159,11 +174,11 @@ export function useSession() {
 // Higher-order component for protecting routes
 export function withAuth<P extends object>(
     Component: React.ComponentType<P>,
-    requiredRole?: "admin" | "receptionist",
-    requiredPermissions?: string[],
+    requiredRole?: string,
+    requiredPosition?: string[]
 ) {
     return function AuthenticatedComponent(props: P) {
-        const { user, isLoading, isAuthenticated } = useSession()
+        const { account, staff, isLoading, isAuthenticated } = useSession()
 
         useEffect(() => {
             if (!isLoading) {
@@ -171,40 +186,30 @@ export function withAuth<P extends object>(
                     return
                 }
 
-                if (requiredRole && user?.role !== requiredRole) {
+                if (requiredRole && account?.role?.id !== requiredRole) {
                     return
                 }
 
-                if (requiredPermissions && requiredPermissions.length > 0) {
-                    const hasPermissions = requiredPermissions.every((permission) => user?.permissions.includes(permission))
-                    if (!hasPermissions) {
-                        return
-                    }
+                if (requiredPosition && staff && staff.positions && staff.positions.some(pos => requiredPosition.some(rp => rp === pos.positionId))) {
+                    return
                 }
             }
-        }, [user, isLoading, isAuthenticated])
+        }, [account, staff, isLoading, isAuthenticated])
 
         if (isLoading) {
-            return (
-                <div className="min-h-screen flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-                </div>
-            )
+            return <AuthLoading />;
         }
 
         if (!isAuthenticated) {
             return null
         }
 
-        if (requiredRole && user?.role !== requiredRole) {
-            return null
+        if (requiredRole && account?.role?.id !== requiredRole) {
+            return
         }
 
-        if (requiredPermissions && requiredPermissions.length > 0) {
-            const hasPermissions = requiredPermissions.every((permission) => user?.permissions.includes(permission))
-            if (!hasPermissions) {
-                return null
-            }
+        if (requiredPosition && staff && staff.positions && staff.positions.some(pos => requiredPosition.some(rp => rp === pos.positionId))) {
+            return
         }
 
         return <Component {...props} />

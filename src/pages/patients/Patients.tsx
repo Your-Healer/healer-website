@@ -1,13 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Sidebar } from "@/components/layout/Sidebar/Sidebar"
 import { Header } from "@/components/layout/Header/Header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
     Dialog,
@@ -17,204 +16,475 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Edit, Trash2, Search, Eye } from "lucide-react"
-import { Patient } from "@/utils/types"
-import { useNavigate } from "@tanstack/react-router"
-import { mockPatients } from "@/utils/fake-data"
+import { Plus, Edit, Trash2, Search, Eye, User, Phone, Calendar, MapPin, RefreshCw } from "lucide-react"
+import { PatientWithDetails } from "@/models/models"
+import { useSession } from "@/contexts/SessionProvider"
+import { useGetPatients } from "@/hooks/use-patients"
+import { TableLoading, ButtonLoading } from "@/components/loading"
+import { toast } from "sonner"
+import { Pagination } from "@/components/ui/pagination"
+import { SelectDepartments } from "@/components/select/SelectDepartments"
+import { useGetDepartments } from "@/hooks/use-departments"
 
 export default function PatientManagement() {
-    const [userRole, setUserRole] = useState<"admin" | "receptionist" | null>(null)
-    const [patients, setPatients] = useState<Patient[]>(
-        mockPatients
-    )
+    const { user, account } = useSession()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
-    const [editingPatient, setEditingPatient] = useState<Patient | null>(null)
-    const [viewingPatient, setViewingPatient] = useState<Patient | null>(null)
+    const [editingPatient, setEditingPatient] = useState<PatientWithDetails | null>(null)
+    const [viewingPatient, setViewingPatient] = useState<PatientWithDetails | null>(null)
     const [searchTerm, setSearchTerm] = useState("")
-    const navigate = useNavigate()
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("")
+    const [departmentFilter, setDepartmentFilter] = useState<string>("all")
+    const [currentPage, setCurrentPage] = useState(1)
+    const [itemsPerPage, setItemsPerPage] = useState(10)
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
+    // Debounce search term
     useEffect(() => {
-        const role = localStorage.getItem("userRole") as "admin" | "receptionist"
-        if (!role) {
-            navigate({ to: "/" })
-            return
-        }
-        setUserRole(role)
-    }, [navigate])
+        const timer = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm)
+            setCurrentPage(1)
+        }, 500)
+
+        return () => clearTimeout(timer)
+    }, [searchTerm])
+
+    // Reset page when filters change
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [departmentFilter])
+
+    const { patients, pagination, loading, refetch } = useGetPatients({
+        page: currentPage,
+        limit: itemsPerPage,
+        searchTerm: debouncedSearchTerm || undefined,
+    })
+
+    console.log(pagination)
 
     const handleAddPatient = () => {
         setEditingPatient(null)
         setIsDialogOpen(true)
     }
 
-    const handleEditPatient = (patient: Patient) => {
+    const handleEditPatient = (patient: PatientWithDetails) => {
         setEditingPatient(patient)
         setIsDialogOpen(true)
     }
 
-    const handleViewPatient = (patient: Patient) => {
+    const handleViewPatient = (patient: PatientWithDetails) => {
         setViewingPatient(patient)
         setIsViewDialogOpen(true)
     }
 
-    const handleDeletePatient = (id: string) => {
-        setPatients(patients?.filter((p) => p.id !== id))
+    const handleDeletePatient = async (id: string) => {
+        if (window.confirm("Bạn có chắc chắn muốn xóa bệnh nhân này?")) {
+            try {
+                setIsSubmitting(true)
+                // Add delete API call here
+                toast.success("Xóa bệnh nhân thành công")
+            } catch (error) {
+                toast.error("Lỗi khi xóa bệnh nhân")
+            } finally {
+                setIsSubmitting(false)
+            }
+        }
     }
 
-    const filteredPatients = patients?.filter(
-        (p) =>
-            p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            p.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            p.phone.includes(searchTerm),
-    )
+    const handleSubmitPatient = async () => {
+        try {
+            setIsSubmitting(true)
+            // Add create/update API call here
+            setIsDialogOpen(false)
+            toast.success(editingPatient ? "Cập nhật bệnh nhân thành công" : "Thêm bệnh nhân thành công")
+        } catch (error) {
+            toast.error("Lỗi khi lưu thông tin bệnh nhân")
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
 
-    if (!userRole) return null
+    const handleSearchChange = useCallback((value: string) => {
+        setSearchTerm(value)
+    }, [])
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page)
+    }
+
+    const handleItemsPerPageChange = (newItemsPerPage: number) => {
+        setItemsPerPage(newItemsPerPage)
+        setCurrentPage(1) // Reset to first page
+    }
+
+    const clearAllFilters = () => {
+        setSearchTerm("")
+        setDepartmentFilter("all")
+        setCurrentPage(1)
+    }
+
+    const hasActiveFilters = searchTerm !== "" || departmentFilter !== "all"
+
+    // Use hooks to get departments for filter display
+    const { departments } = useGetDepartments({
+        page: 1,
+        limit: 100,
+    })
+
+    // Helper function to get department name from ID
+    const getDepartmentName = (departmentId: string) => {
+        if (departmentId === "all") return "Tất cả khoa"
+        const dept = departments?.find(d => d.id === departmentId)
+        return dept?.name || "Không xác định"
+    }
 
     return (
         <div className="flex h-screen bg-gray-50">
-            <Sidebar userRole={userRole} />
+            <Sidebar userRole={account?.role?.id || "1"} />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <Header />
                 <main className="flex-1 overflow-y-auto p-6">
                     <div className="mb-6">
-                        <h1 className="text-2xl font-bold text-gray-900">Patient Management</h1>
-                        <p className="text-gray-600">Manage patient records and information</p>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h1 className="text-2xl font-bold text-gray-900">Quản Lý Bệnh Nhân</h1>
+                                <p className="text-gray-600">Quản lý thông tin và hồ sơ bệnh nhân</p>
+                            </div>
+                            <div className="flex gap-2">
+                                <Button variant="outline" onClick={refetch} disabled={loading}>
+                                    <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+                                    Làm mới
+                                </Button>
+                                <Button onClick={handleAddPatient} disabled={isSubmitting}>
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Thêm Bệnh Nhân
+                                </Button>
+                            </div>
+                        </div>
                     </div>
-
                     <Card>
                         <CardHeader>
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <CardTitle>Patients</CardTitle>
-                                    <CardDescription>View and manage patient records</CardDescription>
+                                    <CardTitle>Danh Sách Bệnh Nhân</CardTitle>
+                                    <CardDescription>
+                                        Xem và quản lý tất cả bệnh nhân trong hệ thống
+                                        {pagination && (
+                                            <span className="ml-2 text-sm font-medium">
+                                                ({pagination.total} bệnh nhân)
+                                            </span>
+                                        )}
+                                    </CardDescription>
                                 </div>
-                                <Button onClick={handleAddPatient}>
-                                    <Plus className="h-4 w-4 mr-2" />
-                                    Add Patient
-                                </Button>
                             </div>
-                            <div className="flex items-center gap-4 mt-4">
-                                <div className="relative flex-1 max-w-sm">
-                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                                    <Input
-                                        placeholder="Search patients..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="pl-10"
+
+                            <div className="space-y-4 mt-4">
+                                <div className="flex flex-col sm:flex-row gap-4">
+                                    <div className="relative flex-1 max-w-sm">
+                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                        <Input
+                                            placeholder="Tìm kiếm theo tên, email, số điện thoại..."
+                                            value={searchTerm}
+                                            onChange={(e) => handleSearchChange(e.target.value)}
+                                            className="pl-10"
+                                        />
+                                    </div>
+
+                                    <SelectDepartments
+                                        value={departmentFilter}
+                                        onValueChange={setDepartmentFilter}
+                                        className="w-[200px]"
+                                        includeAll={true}
+                                        allLabel="Tất cả khoa"
                                     />
+
                                 </div>
+
+                                {hasActiveFilters && (
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <span>Bộ lọc đang áp dụng:</span>
+                                        {searchTerm && (
+                                            <Badge variant="secondary" className="gap-1">
+                                                Tìm kiếm: "{searchTerm}"
+                                                <button
+                                                    onClick={() => setSearchTerm("")}
+                                                    className="ml-1 hover:bg-gray-300 rounded-full p-0.5"
+                                                >
+                                                    ×
+                                                </button>
+                                            </Badge>
+                                        )}
+                                        {departmentFilter !== "all" && (
+                                            <Badge variant="secondary" className="gap-1">
+                                                Khoa: {getDepartmentName(departmentFilter)}
+                                                <button
+                                                    onClick={() => setDepartmentFilter("all")}
+                                                    className="ml-1 hover:bg-gray-300 rounded-full p-0.5"
+                                                >
+                                                    ×
+                                                </button>
+                                            </Badge>
+                                        )}
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={clearAllFilters}
+                                            className="text-xs"
+                                        >
+                                            Xóa tất cả bộ lọc
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         </CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Name</TableHead>
-                                        <TableHead>Email</TableHead>
-                                        <TableHead>Phone</TableHead>
-                                        <TableHead>Date of Birth</TableHead>
-                                        <TableHead>Gender</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {filteredPatients.map((patient) => (
-                                        <TableRow key={patient.id}>
-                                            <TableCell className="font-medium">{patient.name}</TableCell>
-                                            <TableCell>{patient.email}</TableCell>
-                                            <TableCell>{patient.phone}</TableCell>
-                                            <TableCell>{patient.dateOfBirth}</TableCell>
-                                            <TableCell>{patient.gender}</TableCell>
-                                            <TableCell>
-                                                <span
-                                                    className={`px-2 py-1 rounded-full text-xs ${patient.status === "Active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                                                        }`}
-                                                >
-                                                    {patient.status}
-                                                </span>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center gap-2">
-                                                    <Button variant="ghost" size="sm" onClick={() => handleViewPatient(patient)}>
-                                                        <Eye className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button variant="ghost" size="sm" onClick={() => handleEditPatient(patient)}>
-                                                        <Edit className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button variant="ghost" size="sm" onClick={() => handleDeletePatient(patient.id)}>
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+
+                        <CardContent className="space-y-4">
+                            {loading ? (
+                                <TableLoading />
+                            ) : (
+                                <>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Họ và tên</TableHead>
+                                                <TableHead>Thông tin liên hệ</TableHead>
+                                                <TableHead>Địa chỉ</TableHead>
+                                                <TableHead>Lịch hẹn</TableHead>
+                                                <TableHead>Trạng thái</TableHead>
+                                                <TableHead>Thao tác</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {patients?.map((patient) => (
+                                                <TableRow key={patient.id}>
+                                                    <TableCell className="font-medium">
+                                                        <div className="flex flex-col">
+                                                            <span className="font-semibold">
+                                                                {`${patient.firstname} ${patient.lastname}`}
+                                                            </span>
+                                                            <span className="text-sm text-gray-500">
+                                                                ID: {patient.id}
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div className="flex flex-col gap-1">
+                                                            {patient.user?.email && (
+                                                                <a
+                                                                    href={`mailto:${patient.user.email}`}
+                                                                    className="text-blue-600 hover:underline text-sm"
+                                                                >
+                                                                    {patient.user.email}
+                                                                </a>
+                                                            )}
+                                                            {patient.phoneNumber && (
+                                                                <a
+                                                                    href={`tel:${patient.phoneNumber}`}
+                                                                    className="text-blue-600 hover:underline text-sm flex items-center gap-1"
+                                                                >
+                                                                    <Phone className="h-3 w-3" />
+                                                                    {patient.phoneNumber}
+                                                                </a>
+                                                            )}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {patient.address ? (
+                                                            <div className="flex items-center gap-1 text-sm">
+                                                                <MapPin className="h-3 w-3" />
+                                                                <span className="truncate max-w-[200px]" title={patient.address}>
+                                                                    {patient.address}
+                                                                </span>
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-gray-400">Chưa có</span>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {patient.Appointment && patient.Appointment.length > 0 ? (
+                                                            <Badge variant="default" className="gap-1">
+                                                                <Calendar className="h-3 w-3" />
+                                                                {patient.Appointment.length} lịch hẹn
+                                                            </Badge>
+                                                        ) : (
+                                                            <Badge variant="outline" className="gap-1">
+                                                                <Calendar className="h-3 w-3" />
+                                                                Chưa có lịch hẹn
+                                                            </Badge>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Badge variant="secondary" className="gap-1">
+                                                            <User className="h-3 w-3" />
+                                                            Hoạt động
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div className="flex items-center gap-2">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => handleViewPatient(patient)}
+                                                                disabled={isSubmitting}
+                                                                title="Xem chi tiết bệnh nhân"
+                                                            >
+                                                                <Eye className="h-4 w-4" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => handleEditPatient(patient)}
+                                                                disabled={isSubmitting}
+                                                                title="Chỉnh sửa bệnh nhân"
+                                                            >
+                                                                <Edit className="h-4 w-4" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => handleDeletePatient(patient.id)}
+                                                                disabled={isSubmitting}
+                                                                title="Xóa bệnh nhân"
+                                                            >
+                                                                <Trash2 className="h-4 w-4 text-red-600" />
+                                                            </Button>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+
+                                    {patients?.length === 0 && !loading && (
+                                        <div className="text-center py-12">
+                                            <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                                Không tìm thấy bệnh nhân
+                                            </h3>
+                                            <p className="text-gray-500 mb-4">
+                                                {hasActiveFilters
+                                                    ? "Không có bệnh nhân nào phù hợp với bộ lọc của bạn."
+                                                    : "Chưa có bệnh nhân nào trong hệ thống."
+                                                }
+                                            </p>
+                                            {hasActiveFilters && (
+                                                <Button variant="outline" onClick={clearAllFilters}>
+                                                    Xóa bộ lọc
+                                                </Button>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {pagination && pagination.total > 0 && (
+                                        <Pagination
+                                            currentPage={pagination.page}
+                                            totalPages={pagination.totalPages}
+                                            totalItems={pagination.total}
+                                            itemsPerPage={pagination.limit}
+                                            onPageChange={handlePageChange}
+                                            onItemsPerPageChange={handleItemsPerPageChange}
+                                            className="mt-4"
+                                        />
+                                    )}
+                                </>
+                            )}
                         </CardContent>
                     </Card>
 
                     {/* Add/Edit Patient Dialog */}
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                        <DialogContent className="sm:max-w-[600px]">
+                        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
-                                <DialogTitle>{editingPatient ? "Edit Patient" : "Add New Patient"}</DialogTitle>
+                                <DialogTitle>
+                                    {editingPatient ? "Chỉnh Sửa Bệnh Nhân" : "Thêm Bệnh Nhân Mới"}
+                                </DialogTitle>
                                 <DialogDescription>
-                                    {editingPatient ? "Update patient information" : "Enter the details for the new patient"}
+                                    {editingPatient ? "Cập nhật thông tin bệnh nhân" : "Nhập thông tin cho bệnh nhân mới"}
                                 </DialogDescription>
                             </DialogHeader>
-                            <div className="grid gap-4 py-4 max-h-[400px] overflow-y-auto">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="name">Full Name</Label>
-                                        <Input id="name" defaultValue={editingPatient?.name} />
+
+                            <div className="grid gap-6 py-4">
+                                {/* Basic Information */}
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
+                                        Thông Tin Cơ Bản
+                                    </h3>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="firstName">Họ *</Label>
+                                            <Input
+                                                id="firstName"
+                                                defaultValue={editingPatient?.firstname}
+                                                placeholder="Nhập họ"
+                                            />
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="lastName">Tên *</Label>
+                                            <Input
+                                                id="lastName"
+                                                defaultValue={editingPatient?.lastname}
+                                                placeholder="Nhập tên"
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="email">Email</Label>
-                                        <Input id="email" type="email" defaultValue={editingPatient?.email} />
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="email">Email</Label>
+                                            <Input
+                                                id="email"
+                                                type="email"
+                                                defaultValue={editingPatient?.user?.email}
+                                                placeholder="Nhập địa chỉ email"
+                                            />
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="phone">Số điện thoại</Label>
+                                            <Input
+                                                id="phone"
+                                                type="tel"
+                                                defaultValue={editingPatient?.phoneNumber}
+                                                placeholder="Nhập số điện thoại"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+
+                                {/* Personal Information */}
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
+                                        Thông Tin Cá Nhân
+                                    </h3>
+
                                     <div className="grid gap-2">
-                                        <Label htmlFor="phone">Phone</Label>
-                                        <Input id="phone" defaultValue={editingPatient?.phone} />
+                                        <Label htmlFor="address">Địa chỉ</Label>
+                                        <Textarea
+                                            id="address"
+                                            defaultValue={editingPatient?.address}
+                                            placeholder="Nhập địa chỉ chi tiết"
+                                            rows={3}
+                                        />
                                     </div>
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="dob">Date of Birth</Label>
-                                        <Input id="dob" type="date" defaultValue={editingPatient?.dateOfBirth} />
-                                    </div>
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="gender">Gender</Label>
-                                    <Select defaultValue={editingPatient?.gender}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select gender" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="Male">Male</SelectItem>
-                                            <SelectItem value="Female">Female</SelectItem>
-                                            <SelectItem value="Other">Other</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="address">Address</Label>
-                                    <Textarea id="address" defaultValue={editingPatient?.address} />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="emergency">Emergency Contact</Label>
-                                    <Input id="emergency" defaultValue={editingPatient?.emergencyContact} />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="history">Medical History</Label>
-                                    <Textarea id="history" defaultValue={editingPatient?.medicalHistory} />
                                 </div>
                             </div>
+
                             <DialogFooter>
-                                <Button type="submit" onClick={() => setIsDialogOpen(false)}>
-                                    {editingPatient ? "Update" : "Add"} Patient
+                                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                                    Hủy
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    onClick={handleSubmitPatient}
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? (
+                                        <ButtonLoading message={editingPatient ? "Đang cập nhật..." : "Đang thêm..."} />
+                                    ) : (
+                                        editingPatient ? "Cập Nhật" : "Thêm Bệnh Nhân"
+                                    )}
                                 </Button>
                             </DialogFooter>
                         </DialogContent>
@@ -222,51 +492,69 @@ export default function PatientManagement() {
 
                     {/* View Patient Dialog */}
                     <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-                        <DialogContent className="sm:max-w-[600px]">
+                        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
-                                <DialogTitle>Patient Details</DialogTitle>
-                                <DialogDescription>Complete patient information</DialogDescription>
+                                <DialogTitle>Chi Tiết Bệnh Nhân</DialogTitle>
+                                <DialogDescription>Thông tin chi tiết về bệnh nhân</DialogDescription>
                             </DialogHeader>
                             {viewingPatient && (
-                                <div className="grid gap-4 py-4">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <Label className="font-semibold">Name</Label>
-                                            <p>{viewingPatient.name}</p>
+                                <div className="grid gap-6 py-4">
+                                    {/* Basic Information */}
+                                    <div className="space-y-3">
+                                        <h4 className="font-medium text-gray-900 border-b pb-1">Thông Tin Cơ Bản</h4>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <Label className="font-semibold text-sm">Họ và tên</Label>
+                                                <p className="text-sm">{`${viewingPatient.firstname} ${viewingPatient.lastname}`}</p>
+                                            </div>
+                                            <div>
+                                                <Label className="font-semibold text-sm">ID bệnh nhân</Label>
+                                                <p className="text-sm">{viewingPatient.id}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <Label className="font-semibold">Email</Label>
-                                            <p>{viewingPatient.email}</p>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <Label className="font-semibold text-sm">Email</Label>
+                                                <p className="text-sm">{viewingPatient.user?.email || "Chưa có"}</p>
+                                            </div>
+                                            <div>
+                                                <Label className="font-semibold text-sm">Số điện thoại</Label>
+                                                <p className="text-sm">{viewingPatient.phoneNumber || "Chưa có"}</p>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
+
+                                    {/* Address */}
+                                    <div className="space-y-3">
+                                        <h4 className="font-medium text-gray-900 border-b pb-1">Địa Chỉ</h4>
                                         <div>
-                                            <Label className="font-semibold">Phone</Label>
-                                            <p>{viewingPatient.phone}</p>
-                                        </div>
-                                        <div>
-                                            <Label className="font-semibold">Date of Birth</Label>
-                                            <p>{viewingPatient.dateOfBirth}</p>
+                                            <p className="text-sm">{viewingPatient.address || "Chưa có thông tin địa chỉ"}</p>
                                         </div>
                                     </div>
-                                    <div>
-                                        <Label className="font-semibold">Gender</Label>
-                                        <p>{viewingPatient.gender}</p>
-                                    </div>
-                                    <div>
-                                        <Label className="font-semibold">Address</Label>
-                                        <p>{viewingPatient.address}</p>
-                                    </div>
-                                    <div>
-                                        <Label className="font-semibold">Emergency Contact</Label>
-                                        <p>{viewingPatient.emergencyContact}</p>
-                                    </div>
-                                    <div>
-                                        <Label className="font-semibold">Medical History</Label>
-                                        <p>{viewingPatient.medicalHistory}</p>
+
+                                    {/* Appointments */}
+                                    <div className="space-y-3">
+                                        <h4 className="font-medium text-gray-900 border-b pb-1">Lịch Hẹn</h4>
+                                        <div>
+                                            {viewingPatient.Appointment && viewingPatient.Appointment.length > 0 ? (
+                                                <div className="space-y-2">
+                                                    <p className="text-sm font-medium">
+                                                        Tổng số lịch hẹn: {viewingPatient.Appointment.length}
+                                                    </p>
+                                                    {/* Add more appointment details as needed */}
+                                                </div>
+                                            ) : (
+                                                <p className="text-sm text-gray-500">Chưa có lịch hẹn nào</p>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             )}
+                            <DialogFooter>
+                                <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+                                    Đóng
+                                </Button>
+                            </DialogFooter>
                         </DialogContent>
                     </Dialog>
                 </main>
