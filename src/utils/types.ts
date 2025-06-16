@@ -85,11 +85,20 @@ export interface AppointmentFilter {
 
 export interface GetAppointmentsRequest extends Pagination, AppointmentFilter {}
 
-export interface GetAppointmentsResponse extends Appointment {
-	user: User & Account;
-	patient: Patient;
-	medicalRoom: MedicalRoom & Service & Department;
-	bookingTime: BookingTime & MedicalRoomTime;
+export interface GetPatientAppointmentHistoryRequest extends Pagination {
+	patientId: string;
+	status?: APPOINTMENTSTATUS;
+}
+
+export interface CreateAppointmentRequest {
+	userId: string;
+	patientId: string;
+	medicalRoomTimeId: string;
+	notes?: string;
+}
+
+export interface UpdateStatusAppointmentRequest {
+	status: APPOINTMENTSTATUS;
 }
 
 export interface GetAllStaffs extends Pagination {
