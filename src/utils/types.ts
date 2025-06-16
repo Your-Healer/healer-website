@@ -86,7 +86,6 @@ export interface AppointmentFilter {
 export interface GetAppointmentsRequest extends Pagination, AppointmentFilter {}
 
 export interface GetPatientAppointmentHistoryRequest extends Pagination {
-	patientId: string;
 	status?: APPOINTMENTSTATUS;
 }
 
