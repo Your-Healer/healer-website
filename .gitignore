@@ -33,4 +33,4 @@ storybook-static
 # tests
 /coverage/
 
-.env
+*.env
