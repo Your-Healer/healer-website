@@ -27,7 +27,7 @@ export function SelectServices({
 }: SelectServicesProps) {
     const { services, loading } = useGetServices({
         page: 1,
-        limit: 100, // Get all services
+        limit: 1000, // Get all services
     })
 
     return (

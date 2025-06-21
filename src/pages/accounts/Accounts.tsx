@@ -9,14 +9,6 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { Plus, Edit, Trash2, Search, Shield, Eye, EyeOff, UserCheck, UserX, User, Users, RefreshCw } from "lucide-react"
 import { AccountWithDetails, AccountWithRole } from "@/models/models"
 import { useNavigate } from "@tanstack/react-router"
@@ -25,6 +17,7 @@ import { useGetAccounts } from "@/hooks/use-accounts"
 import { TableLoading, ButtonLoading } from "@/components/loading"
 import { toast } from "sonner"
 import { Pagination } from "@/components/ui/pagination"
+import { EditingAccountDialog } from "@/components/dialog/accounts/EditingAccountDialog"
 
 export default function AccountManagement() {
   const { account } = useSession()
@@ -78,6 +71,7 @@ export default function AccountManagement() {
         setIsSubmitting(true)
         // Add delete API call here
         toast.success("Xóa tài khoản thành công")
+        refetch() // Refresh the accounts list
       } catch (error) {
         toast.error("Lỗi khi xóa tài khoản")
       } finally {
@@ -86,17 +80,8 @@ export default function AccountManagement() {
     }
   }
 
-  const handleSubmitAccount = async () => {
-    try {
-      setIsSubmitting(true)
-      // Add create/update API call here
-      setIsDialogOpen(false)
-      toast.success(editingAccount ? "Cập nhật tài khoản thành công" : "Tạo tài khoản thành công")
-    } catch (error) {
-      toast.error("Lỗi khi lưu tài khoản")
-    } finally {
-      setIsSubmitting(false)
-    }
+  const handleDialogSuccess = () => {
+    refetch() // Refresh the accounts list after successful create/update
   }
 
   const getRoleDisplayName = (roleId: string) => {
@@ -127,12 +112,7 @@ export default function AccountManagement() {
     setCurrentPage(1)
   }
 
-  const getFilteredAccounts = () => {
-    // Since filtering is now handled by the API, just return the accounts
-    return getAccountsResult || []
-  }
-
-  const filteredAccounts = getFilteredAccounts()
+  const filteredAccounts = getAccountsResult || []
   const hasActiveFilters = searchTerm !== "" || roleFilter !== "all" || statusFilter !== "all"
 
   const handlePageChange = (page: number) => {
@@ -435,75 +415,12 @@ export default function AccountManagement() {
             </CardContent>
           </Card>
 
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingAccount ? "Chỉnh Sửa Tài Khoản" : "Thêm Tài Khoản Mới"}
-                </DialogTitle>
-                <DialogDescription>
-                  {editingAccount ? "Cập nhật thông tin tài khoản" : "Tạo tài khoản người dùng mới"}
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="username">Tên đăng nhập *</Label>
-                  <Input
-                    id="username"
-                    defaultValue={editingAccount?.username}
-                    placeholder="Nhập tên đăng nhập"
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    defaultValue={editingAccount?.email}
-                    placeholder="Nhập địa chỉ email"
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="phoneNumber">Số điện thoại</Label>
-                  <Input
-                    id="phoneNumber"
-                    type="tel"
-                    defaultValue={editingAccount?.phoneNumber}
-                    placeholder="Nhập số điện thoại"
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="password">Mật khẩu {editingAccount ? "" : "*"}</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder={editingAccount ? "Để trống nếu không thay đổi" : "Nhập mật khẩu"}
-                  />
-                </div>
-              </div>
-
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Hủy
-                </Button>
-                <Button
-                  type="submit"
-                  onClick={handleSubmitAccount}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <ButtonLoading message={editingAccount ? "Đang cập nhật..." : "Đang tạo..."} />
-                  ) : (
-                    editingAccount ? "Cập Nhật" : "Tạo Tài Khoản"
-                  )}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <EditingAccountDialog
+            open={isDialogOpen}
+            onOpenChange={setIsDialogOpen}
+            editingAccount={editingAccount}
+            onSuccess={handleDialogSuccess}
+          />
         </main>
       </div>
     </div>

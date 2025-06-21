@@ -13,6 +13,8 @@ api.interceptors.request.use((config) => {
 	if (token) {
 		config.headers.Authorization = `Bearer ${token}`;
 	}
+	const fullUrl = axios.getUri(config);
+	console.log("Requesting:", fullUrl);
 	return config;
 });
 

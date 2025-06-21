@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Sidebar } from "@/components/layout/Sidebar/Sidebar"
+import Sidebar from "@/components/layout/Sidebar/Sidebar"
 import { Header } from "@/components/layout/Header/Header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,66 +16,28 @@ import { Separator } from "@/components/ui/separator"
 import { User, Mail, Phone, MapPin, Calendar, Camera, Save, Key, Activity, Clock, Settings } from "lucide-react"
 import { useSession } from "@/contexts/SessionProvider"
 import { useNavigate } from "@tanstack/react-router"
+import { useGetMyAccount } from "@/hooks/use-accounts"
+import { PageLoading } from "@/components/loading"
 
 export default function ProfilePage() {
     const { account, updateUser, isAuthenticated } = useSession()
-    const [profile, setProfile] = useState<UserProfile | null>(null)
     const [isEditing, setIsEditing] = useState(false)
     const navigate = useNavigate()
 
-    const { account: getMyAccount, loading: getMyAccountLoading } = useGetMyAccount()
-
-    useEffect(() => {
-        if (!isAuthenticated) {
-            navigate({ to: "/" })
-            return
-        }
-
-        if (getMyAccount?.user) {
-            setProfile({
-                id: getMyAccount?.user?.id,
-                firstName: getMyAccount?.user?.firstname,
-                lastName: getMyAccount?.user?.lastname,
-                email: getMyAccount?.email,
-                phone: getMyAccount?.phoneNumber || "",
-                address: getMyAccount?.user?.address || "",
-                role: getMyAccount?.role
-            })
-        }
-    }, [getMyAccount, isAuthenticated, navigate])
-
-    const handleSave = () => {
-        if (profile && user) {
-            updateUser({
-                firstName: profile.firstName,
-                lastName: profile.lastName,
-                email: profile.email,
-                phone: profile.phone,
-                address: profile.address,
-                dateOfBirth: profile.dateOfBirth,
-                bio: profile.bio,
-                avatar: profile.avatar,
-            })
-            setIsEditing(false)
-        }
+    if (!isAuthenticated || !account) {
+        return (
+            <PageLoading />
+        )
     }
 
-    const handleInputChange = (field: keyof UserProfile, value: string) => {
-        if (profile) {
-            setProfile((prev) => (prev ? { ...prev, [field]: value } : null))
-        }
+    const { account: getMyAccount, loading: getMyAccountLoading, refetch: refetchGetMyAccount } = useGetMyAccount(account?.id)
+
+    const handleSave = () => {
+
     }
 
     const getInitials = (firstName: string, lastName: string) => {
         return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
-    }
-
-    if (!isAuthenticated || !account?.role?.id || !profile) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-            </div>
-        )
     }
 
     const isAdmin = account?.role?.id === "1"
@@ -85,7 +47,7 @@ export default function ProfilePage() {
 
     return (
         <div className="flex h-screen bg-gray-50">
-            <Sidebar userRole={user.role} />
+            <Sidebar userRole={account.role?.id} />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <Header />
                 <main className="flex-1 overflow-y-auto p-6">
@@ -134,11 +96,16 @@ export default function ProfilePage() {
                                             <div className="relative">
                                                 <Avatar className="h-24 w-24">
                                                     <AvatarImage
-                                                        src={profile.avatar || "/placeholder.svg?height=96&width=96"}
-                                                        alt={`${profile.firstName} ${profile.lastName}`}
+                                                        src={"/placeholder.svg?height=96&width=96"}
+                                                        alt={getMyAccount?.roleId == "2" ? `${getMyAccount?.staff?.firstname} ${getMyAccount?.staff?.lastname}` : `${getMyAccount?.user?.firstname} ${getMyAccount?.user?.lastname}`}
                                                     />
                                                     <AvatarFallback className="text-lg">
-                                                        {getInitials(profile.firstName, profile.lastName)}
+                                                        {
+
+                                                            getMyAccount?.roleId == "2" ?
+                                                                getInitials(getMyAccount?.staff?.firstname || "", getMyAccount?.staff?.lastname || "") :
+                                                                getInitials(getMyAccount?.user?.firstname || "", getMyAccount?.user?.lastname || "")
+                                                        }
                                                     </AvatarFallback>
                                                 </Avatar>
                                                 {isEditing && (
@@ -153,11 +120,11 @@ export default function ProfilePage() {
                                             </div>
                                             <div>
                                                 <h3 className="text-lg font-semibold">
-                                                    {profile.firstName} {profile.lastName}
+                                                    {getMyAccount?.roleId == "2" ? `${getMyAccount?.staff?.firstname} ${getMyAccount?.staff?.lastname}` : `${getMyAccount?.user?.firstname} ${getMyAccount?.user?.lastname}`}
                                                 </h3>
-                                                <p className="text-gray-600">{profile.role}</p>
+                                                <p className="text-gray-600">{getMyAccount.role}</p>
                                                 <Badge variant="secondary" className="mt-1">
-                                                    {profile.department}
+                                                    {getMyAccount.department}
                                                 </Badge>
                                             </div>
                                         </div>
@@ -169,7 +136,7 @@ export default function ProfilePage() {
                                                 <Label htmlFor="firstName">First Name</Label>
                                                 <Input
                                                     id="firstName"
-                                                    value={profile.firstName}
+                                                    value={getMyAccount.firstName}
                                                     onChange={(e) => handleInputChange("firstName", e.target.value)}
                                                     disabled={!isEditing}
                                                 />
@@ -178,7 +145,7 @@ export default function ProfilePage() {
                                                 <Label htmlFor="lastName">Last Name</Label>
                                                 <Input
                                                     id="lastName"
-                                                    value={profile.lastName}
+                                                    value={getMyAccount.lastName}
                                                     onChange={(e) => handleInputChange("lastName", e.target.value)}
                                                     disabled={!isEditing}
                                                 />
@@ -190,7 +157,7 @@ export default function ProfilePage() {
                                                     <Input
                                                         id="email"
                                                         type="email"
-                                                        value={profile.email}
+                                                        value={getMyAccount.email}
                                                         onChange={(e) => handleInputChange("email", e.target.value)}
                                                         disabled={!isEditing}
                                                         className="pl-10"
@@ -203,7 +170,7 @@ export default function ProfilePage() {
                                                     <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                                                     <Input
                                                         id="phone"
-                                                        value={profile.phone}
+                                                        value={getMyAccount.phone}
                                                         onChange={(e) => handleInputChange("phone", e.target.value)}
                                                         disabled={!isEditing}
                                                         className="pl-10"
@@ -217,7 +184,7 @@ export default function ProfilePage() {
                                                     <Input
                                                         id="dateOfBirth"
                                                         type="date"
-                                                        value={profile.dateOfBirth}
+                                                        value={getMyAccount.dateOfBirth}
                                                         onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
                                                         disabled={!isEditing}
                                                         className="pl-10"
@@ -226,7 +193,7 @@ export default function ProfilePage() {
                                             </div>
                                             <div className="space-y-2">
                                                 <Label htmlFor="employeeId">Employee ID</Label>
-                                                <Input id="employeeId" value={profile.employeeId} disabled className="bg-gray-50" />
+                                                <Input id="employeeId" value={getMyAccount.employeeId} disabled className="bg-gray-50" />
                                             </div>
                                         </div>
 
@@ -236,7 +203,7 @@ export default function ProfilePage() {
                                                 <MapPin className="absolute left-3 top-3 text-gray-400 h-4 w-4" />
                                                 <Textarea
                                                     id="address"
-                                                    value={profile.address}
+                                                    value={getMyAccount.address}
                                                     onChange={(e) => handleInputChange("address", e.target.value)}
                                                     disabled={!isEditing}
                                                     className="pl-10"
@@ -249,7 +216,7 @@ export default function ProfilePage() {
                                             <Label htmlFor="bio">Bio</Label>
                                             <Textarea
                                                 id="bio"
-                                                value={profile.bio}
+                                                value={getMyAccount.bio}
                                                 onChange={(e) => handleInputChange("bio", e.target.value)}
                                                 disabled={!isEditing}
                                                 rows={4}
@@ -271,11 +238,11 @@ export default function ProfilePage() {
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 <div className="space-y-2">
                                                     <Label htmlFor="employeeId">Employee ID</Label>
-                                                    <Input id="employeeId" value={profile.employeeId} disabled className="bg-gray-50" />
+                                                    <Input id="employeeId" value={getMyAccount.employeeId} disabled className="bg-gray-50" />
                                                 </div>
                                                 <div className="space-y-2">
                                                     <Label htmlFor="role">Role</Label>
-                                                    <Select value={profile.role} disabled={!isEditing}>
+                                                    <Select value={getMyAccount.role} disabled={!isEditing}>
                                                         <SelectTrigger>
                                                             <SelectValue />
                                                         </SelectTrigger>
@@ -289,7 +256,7 @@ export default function ProfilePage() {
                                                 </div>
                                                 <div className="space-y-2">
                                                     <Label htmlFor="department">Department</Label>
-                                                    <Select value={profile.department} disabled={!isEditing}>
+                                                    <Select value={getMyAccount.department} disabled={!isEditing}>
                                                         <SelectTrigger>
                                                             <SelectValue />
                                                         </SelectTrigger>
@@ -303,7 +270,7 @@ export default function ProfilePage() {
                                                 </div>
                                                 <div className="space-y-2">
                                                     <Label htmlFor="joinDate">Join Date</Label>
-                                                    <Input id="joinDate" type="date" value={profile.joinDate} disabled className="bg-gray-50" />
+                                                    <Input id="joinDate" type="date" value={getMyAccount.joinDate} disabled className="bg-gray-50" />
                                                 </div>
                                             </div>
 
@@ -428,7 +395,7 @@ export default function ProfilePage() {
                         </Tabs>
                     </div>
                 </main>
-            </div>
-        </div>
+            </div >
+        </div >
     )
 }

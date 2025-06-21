@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Home, Search, AlertTriangle } from "lucide-react";
 import { useSession } from "@/contexts/SessionProvider";
-import { Sidebar } from "@/components/layout/Sidebar/Sidebar";
+import Sidebar from "@/components/layout/Sidebar/Sidebar";
 import { Header } from "@/components/layout/Header/Header";
 
 export default function NotFound() {

@@ -27,7 +27,7 @@ export function SelectLocations({
 }: SelectLocationsProps) {
     const { locations, loading } = useGetLocations({
         page: 1,
-        limit: 100,
+        limit: 1000,
     })
 
     return (

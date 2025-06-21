@@ -24,7 +24,7 @@ export function SelectPositions({
 }: SelectPositionsProps) {
     const { positions, loading } = useGetPositions({
         page: 1,
-        limit: 100, // Get all positions
+        limit: 1000, // Get all positions
     })
 
     return (
@@ -92,7 +92,7 @@ export function SelectPositions({
 export function usePositionName(positionId?: string) {
     const { positions } = useGetPositions({
         page: 1,
-        limit: 100,
+        limit: 1000,
     })
 
     const getPositionName = (id?: string) => {

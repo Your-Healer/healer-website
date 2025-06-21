@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback } from "react"
-import { Sidebar } from "@/components/layout/Sidebar/Sidebar"
+import Sidebar from "@/components/layout/Sidebar/Sidebar"
 import { Header } from "@/components/layout/Header/Header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -30,6 +30,7 @@ import { SelectDepartments } from "@/components/select/SelectDepartments"
 import { SelectPositions } from "./SelectPositions"
 import { useGetDepartments } from "@/hooks/use-departments"
 import { useGetPositions } from "@/hooks/use-positions"
+import { getDepartmentName, getEducationDisplayName, getPositionName } from "@/utils/utils"
 
 export default function StaffManagement() {
     const { account } = useSession()
@@ -128,47 +129,13 @@ export default function StaffManagement() {
     // Use hooks to get departments and positions for filter display
     const { departments } = useGetDepartments({
         page: 1,
-        limit: 100,
+        limit: 1000,
     })
 
     const { positions } = useGetPositions({
         page: 1,
-        limit: 100,
+        limit: 1000,
     })
-
-    // Helper functions to get names from IDs
-    const getDepartmentName = (departmentId: string) => {
-        if (departmentId === "all") return "Tất cả khoa"
-        const dept = departments?.find(d => d.id === departmentId)
-        return dept?.name || "Không xác định"
-    }
-
-    const getPositionName = (positionId: string) => {
-        if (positionId === "all") return "Tất cả chức vụ"
-
-        // Handle static positions
-        switch (positionId) {
-            case "1": return "Bác sĩ";
-            case "2": return "Y tá";
-            case "3": return "Lễ tân";
-            case "4": return "Trưởng khoa";
-            default: {
-                const position = positions?.find(pos => pos.id === positionId)
-                return position ? position.name : "Không xác định"
-            }
-        }
-    }
-
-    const getEducationDisplayName = (level: string) => {
-        switch (level) {
-            case "DIPLOMA": return "Cao đẳng";
-            case "ASSOCIATE": return "Liên thông";
-            case "BACHELOR": return "Cử nhân";
-            case "MASTER": return "Thạc sĩ";
-            case "PROFESSIONAL": return "Chuyên nghiệp";
-            default: return "Không xác định";
-        }
-    }
 
     const hasActiveFilters = searchTerm !== "" || departmentFilter !== "all" || positionFilter !== "all" || educationFilter !== "all"
 
@@ -270,7 +237,7 @@ export default function StaffManagement() {
                                         )}
                                         {departmentFilter !== "all" && (
                                             <Badge variant="secondary" className="gap-1">
-                                                Khoa: {getDepartmentName(departmentFilter)}
+                                                Khoa: {getDepartmentName(departments, departmentFilter)}
                                                 <button
                                                     onClick={() => setDepartmentFilter("all")}
                                                     className="ml-1 hover:bg-gray-300 rounded-full p-0.5"
@@ -281,7 +248,7 @@ export default function StaffManagement() {
                                         )}
                                         {positionFilter !== "all" && (
                                             <Badge variant="secondary" className="gap-1">
-                                                Chức vụ: {getPositionName(positionFilter)}
+                                                Chức vụ: {getPositionName(positions, positionFilter)}
                                                 <button
                                                     onClick={() => setPositionFilter("all")}
                                                     className="ml-1 hover:bg-gray-300 rounded-full p-0.5"

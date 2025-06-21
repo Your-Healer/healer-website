@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Sidebar } from "@/components/layout/Sidebar/Sidebar"
+import Sidebar from "@/components/layout/Sidebar/Sidebar"
 import { Header } from "@/components/layout/Header/Header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -71,12 +71,12 @@ export default function MedicalRoomsPage() {
     // Use hooks to get departments and services for filter display
     const { departments } = useGetDepartments({
         page: 1,
-        limit: 100,
+        limit: 1000,
     })
 
     const { services } = useGetServices({
         page: 1,
-        limit: 100,
+        limit: 1000,
     })
 
     // Build API params

@@ -27,7 +27,7 @@ export function SelectDepartments({
 }: SelectDepartmentsProps) {
     const { departments, loading } = useGetDepartments({
         page: 1,
-        limit: 100, // Get all departments
+        limit: 1000, // Get all departments
     })
 
     return (
@@ -51,9 +51,10 @@ export function SelectDepartments({
                             <div className="flex items-center gap-2">
                                 <Building className="h-4 w-4" />
                                 <span>{department.name}</span>
-                                {department.symbol && (
-                                    <span className="text-xs text-gray-500">({department.symbol})</span>
-                                )}
+                                <span className="text-xs text-gray-500">({department.symbol})</span>
+                                <span className="text-xs text-gray-500">
+                                    - Tầng {department.floor}
+                                </span>
                             </div>
                         </SelectItem>
                     ))}

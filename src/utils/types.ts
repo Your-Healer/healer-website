@@ -14,7 +14,7 @@ import {
 	UserWithDetails,
 } from "@/models/models";
 import { IndentDecrease } from "lucide-react";
-import { APPOINTMENTSTATUS } from "./enum";
+import { APPOINTMENTSTATUS, EDUCATIONLEVEL } from "./enum";
 
 export interface LoginUsernameRequest {
 	username: string;
@@ -50,6 +50,12 @@ export interface PaginationResponse<T> {
 	};
 }
 
+export interface ApiResponse<T> {
+	success: boolean;
+	message: string;
+	data: T;
+}
+
 export interface AccountFilter {
 	roleId?: string;
 	emailIsVerified?: boolean;
@@ -73,6 +79,11 @@ export interface GetMyWallet {
 	walletMnemonic: string;
 }
 
+export interface AppointmentOrderBy {
+	orderByFromTime?: "asc" | "desc";
+	orderByToTime?: "asc" | "desc";
+}
+
 export interface AppointmentFilter {
 	userId?: string;
 	staffId?: string;
@@ -83,7 +94,10 @@ export interface AppointmentFilter {
 	toDate?: Date;
 }
 
-export interface GetAppointmentsRequest extends Pagination, AppointmentFilter {}
+export interface GetAppointmentsRequest
+	extends Pagination,
+		AppointmentFilter,
+		AppointmentOrderBy {}
 
 export interface GetPatientAppointmentHistoryRequest extends Pagination {
 	status?: APPOINTMENTSTATUS;
@@ -103,7 +117,7 @@ export interface UpdateStatusAppointmentRequest {
 export interface GetAllStaffs extends Pagination {
 	departmentId?: string;
 	positionId?: string;
-	educationLevel?: "HIGHSCHOOL" | "BACHELOR" | "MASTER" | "DOCTORATE";
+	educationLevel?: EDUCATIONLEVEL;
 	query?: string;
 }
 
@@ -205,4 +219,44 @@ export interface CreateMedicalRoomTimeRequest {
 	roomId: string;
 	fromTime: Date;
 	toTime: Date;
+}
+
+export interface CreateAppointmentRequest {
+	userId: string;
+	patientId: string;
+	medicalRoomTimeId: string;
+	notes?: string;
+}
+
+export interface AdminDashboardStats {
+	totalPatients: number;
+	totalStaff: number;
+	totalAppointments: number;
+	todayAppointments: number;
+	totalDepartments: number;
+	totalMedicalRooms: number;
+	monthlyRevenue: number;
+	completedAppointments: number;
+	pendingAppointments: number;
+	cancelledAppointments: number;
+	averageWaitTime: number;
+	patientSatisfactionRate: number;
+}
+
+export interface DoctorDashboardStats {
+	todayAppointments: number;
+	upcomingAppointments: number;
+	completedToday: number;
+	totalPatients: number;
+	averageConsultationTime: number;
+	currentShifts: number;
+	weeklyHours: number;
+}
+
+export interface RecentActivity {
+	id: string;
+	action: string;
+	user: string;
+	time: string;
+	type: "appointment" | "patient" | "staff" | "system";
 }
