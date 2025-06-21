@@ -1,5 +1,5 @@
 import { Loader2 } from "lucide-react";
-import { cn } from "@/utils/utils";
+import { cn } from "@/lib/utils";
 
 interface LoadingProps {
     variant?: "default" | "fullscreen" | "inline" | "overlay" | "card";

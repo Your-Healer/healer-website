@@ -13,12 +13,15 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as SignInImport } from './routes/sign-in'
 import { Route as DashboardImport } from './routes/dashboard'
+import { Route as layoutImport } from './routes/__layout'
 import { Route as IndexImport } from './routes/index'
 import { Route as StaffsIndexImport } from './routes/staffs/index'
+import { Route as ShiftWorkingsIndexImport } from './routes/shiftWorkings/index'
 import { Route as ServicesIndexImport } from './routes/services/index'
 import { Route as RoomsIndexImport } from './routes/rooms/index'
 import { Route as ProfileIndexImport } from './routes/profile/index'
 import { Route as PatientsIndexImport } from './routes/patients/index'
+import { Route as MedicalRecordsIndexImport } from './routes/medical-records/index'
 import { Route as DepartmentsIndexImport } from './routes/departments/index'
 import { Route as AppointmentsIndexImport } from './routes/appointments/index'
 import { Route as AnalyticsIndexImport } from './routes/analytics/index'
@@ -37,6 +40,11 @@ const DashboardRoute = DashboardImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const layoutRoute = layoutImport.update({
+  id: '/__layout',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const IndexRoute = IndexImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
@@ -44,6 +52,11 @@ const IndexRoute = IndexImport.update({
 
 const StaffsIndexRoute = StaffsIndexImport.update({
   path: '/staffs/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ShiftWorkingsIndexRoute = ShiftWorkingsIndexImport.update({
+  path: '/shiftWorkings/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -64,6 +77,11 @@ const ProfileIndexRoute = ProfileIndexImport.update({
 
 const PatientsIndexRoute = PatientsIndexImport.update({
   path: '/patients/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MedicalRecordsIndexRoute = MedicalRecordsIndexImport.update({
+  path: '/medical-records/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -101,6 +119,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/__layout': {
+      id: '/__layout'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof layoutImport
       parentRoute: typeof rootRoute
     }
     '/dashboard': {
@@ -152,6 +177,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DepartmentsIndexImport
       parentRoute: typeof rootRoute
     }
+    '/medical-records/': {
+      id: '/medical-records/'
+      path: '/medical-records'
+      fullPath: '/medical-records'
+      preLoaderRoute: typeof MedicalRecordsIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/patients/': {
       id: '/patients/'
       path: '/patients'
@@ -180,6 +212,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesIndexImport
       parentRoute: typeof rootRoute
     }
+    '/shiftWorkings/': {
+      id: '/shiftWorkings/'
+      path: '/shiftWorkings'
+      fullPath: '/shiftWorkings'
+      preLoaderRoute: typeof ShiftWorkingsIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/staffs/': {
       id: '/staffs/'
       path: '/staffs'
@@ -201,10 +240,12 @@ export const routeTree = rootRoute.addChildren({
   AnalyticsIndexRoute,
   AppointmentsIndexRoute,
   DepartmentsIndexRoute,
+  MedicalRecordsIndexRoute,
   PatientsIndexRoute,
   ProfileIndexRoute,
   RoomsIndexRoute,
   ServicesIndexRoute,
+  ShiftWorkingsIndexRoute,
   StaffsIndexRoute,
 })
 
@@ -217,6 +258,7 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "__root.ts",
       "children": [
         "/",
+        "/__layout",
         "/dashboard",
         "/sign-in",
         "/staffs/shifts",
@@ -224,15 +266,20 @@ export const routeTree = rootRoute.addChildren({
         "/analytics/",
         "/appointments/",
         "/departments/",
+        "/medical-records/",
         "/patients/",
         "/profile/",
         "/rooms/",
         "/services/",
+        "/shiftWorkings/",
         "/staffs/"
       ]
     },
     "/": {
       "filePath": "index.ts"
+    },
+    "/__layout": {
+      "filePath": "__layout.ts"
     },
     "/dashboard": {
       "filePath": "dashboard.ts"
@@ -255,6 +302,9 @@ export const routeTree = rootRoute.addChildren({
     "/departments/": {
       "filePath": "departments/index.ts"
     },
+    "/medical-records/": {
+      "filePath": "medical-records/index.ts"
+    },
     "/patients/": {
       "filePath": "patients/index.ts"
     },
@@ -266,6 +316,9 @@ export const routeTree = rootRoute.addChildren({
     },
     "/services/": {
       "filePath": "services/index.ts"
+    },
+    "/shiftWorkings/": {
+      "filePath": "shiftWorkings/index.ts"
     },
     "/staffs/": {
       "filePath": "staffs/index.ts"

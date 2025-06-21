@@ -290,3 +290,18 @@ export interface DiagnosisSuggestionWithDetails extends DiagnosisSuggestion {
 export interface AppointmentStatusLogWithDetails extends AppointmentStatusLog {
 	appointment: AppointmentWithDetails;
 }
+
+export interface BlockchainPatientWithDetails {
+	patientName: string;
+	dateOfBirth: string; // timestamp
+	gender: string;
+	address: string;
+	phoneNumber: string;
+	emergencyContact: string; // "EMPTY" if not provided
+	createdAt: string; // block number
+	createdBy: string; // creator's wallet address
+	createByAccount: AccountWithDetails;
+	lastModifiedAt: string; // block number
+	lastModifiedBy: string; // modifier's wallet address
+	lastModifiedByAccount: AccountWithDetails;
+}

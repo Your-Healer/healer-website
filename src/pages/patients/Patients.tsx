@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback } from "react"
-import { Sidebar } from "@/components/layout/Sidebar/Sidebar"
+import Sidebar from "@/components/layout/Sidebar/Sidebar"
 import { Header } from "@/components/layout/Header/Header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -27,6 +27,7 @@ import { toast } from "sonner"
 import { Pagination } from "@/components/ui/pagination"
 import { SelectDepartments } from "@/components/select/SelectDepartments"
 import { useGetDepartments } from "@/hooks/use-departments"
+import { getDepartmentName } from "@/utils/utils"
 
 export default function PatientManagement() {
     const { user, account } = useSession()
@@ -130,15 +131,8 @@ export default function PatientManagement() {
     // Use hooks to get departments for filter display
     const { departments } = useGetDepartments({
         page: 1,
-        limit: 100,
+        limit: 1000,
     })
-
-    // Helper function to get department name from ID
-    const getDepartmentName = (departmentId: string) => {
-        if (departmentId === "all") return "Tất cả khoa"
-        const dept = departments?.find(d => d.id === departmentId)
-        return dept?.name || "Không xác định"
-    }
 
     return (
         <div className="flex h-screen bg-gray-50">
@@ -218,7 +212,7 @@ export default function PatientManagement() {
                                         )}
                                         {departmentFilter !== "all" && (
                                             <Badge variant="secondary" className="gap-1">
-                                                Khoa: {getDepartmentName(departmentFilter)}
+                                                Khoa: {getDepartmentName(departments, departmentFilter)}
                                                 <button
                                                     onClick={() => setDepartmentFilter("all")}
                                                     className="ml-1 hover:bg-gray-300 rounded-full p-0.5"

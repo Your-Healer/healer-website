@@ -1,9 +1,10 @@
 import api from "@/api/axios";
 import { AppointmentWithDetails } from "@/models/models";
-import { AppointmentFilter, GetAppointmentsRequest, GetPatientAppointmentHistoryRequest, PaginationResponse } from "@/utils/types";
+import { AppointmentFilter, CreateAppointmentRequest, GetAppointmentsRequest, GetPatientAppointmentHistoryRequest, PaginationResponse } from "@/utils/types";
 import { useEffect, useState } from "react";
+import axios from "axios";
 
-export const getAppointments = (params: GetAppointmentsRequest) => {
+export const useGetAppointments = (params: GetAppointmentsRequest) => {
     const [appointments, setAppointments] = useState<AppointmentWithDetails[]>([]);
     const [loading, setLoading] = useState(true);
     const [pagination, setPagination] = useState<PaginationResponse<AppointmentWithDetails>['meta'] | null>(null);
@@ -14,7 +15,6 @@ export const getAppointments = (params: GetAppointmentsRequest) => {
             const res = await api.get<PaginationResponse<AppointmentWithDetails>>('/appointments', {
                 params
             });
-            console.log("Appointments fetched successfully:", res.data);
             const appointmentsData = res.data.data || [];
             setAppointments(appointmentsData);
             setPagination(res.data.meta);
@@ -33,7 +33,7 @@ export const getAppointments = (params: GetAppointmentsRequest) => {
     return { appointments, loading, pagination, refetch: fetchAppointments };
 }
 
-export const getAppointmentStatistics = (params: AppointmentFilter) => {
+export const useGetAppointmentStatistics = (params: AppointmentFilter) => {
     const [statistics, setStatistics] = useState<{
         total: number;
         booked: number;
@@ -81,9 +81,7 @@ export const getAppointmentStatistics = (params: AppointmentFilter) => {
     return { statistics, loading, refetch: fetchStatistics };
 }
 
-// export const createNewAppointment = async(appointment)
-
-export const getPatientAppointmentHistory = (patientId: string, params: GetPatientAppointmentHistoryRequest) => {
+export const useGetPatientAppointmentHistory = (patientId: string, params: GetPatientAppointmentHistoryRequest) => {
     const [appointments, setAppointments] = useState<AppointmentWithDetails[]>([]);
     const [loading, setLoading] = useState(true);
     const [pagination, setPagination] = useState<PaginationResponse<AppointmentWithDetails>['meta'] | null>(null);
@@ -112,4 +110,47 @@ export const getPatientAppointmentHistory = (patientId: string, params: GetPatie
     }, [JSON.stringify(params)])
 
     return { appointments, loading, pagination, refetch: fetchAppointments };
+}
+
+export const createNewAppointment = async (body: CreateAppointmentRequest) => {
+    return await api.post('/appointments', body);
+}
+
+export const completeAppointment = async (appointmentId: string) => {
+    return await api.post(`/appointments/${appointmentId}/complete`);
+}
+
+export const cancelAppointment = async (appointmentId: string) => {
+    return await api.post(`/appointments/${appointmentId}/cancel`);
+}
+
+export const useGetAppointmentById = (appointmentId: string) => {
+    const [appointment, setAppointment] = useState<AppointmentWithDetails | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const fetchAppointment = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await api.get<AppointmentWithDetails>(`/appointments/${appointmentId}`);
+            console.log("Appointment fetched successfully:", res.data);
+            setAppointment(res.data);
+        } catch (err) {
+            console.error("Error fetching appointment:", err);
+            setError("Failed to fetch appointment details");
+            setAppointment(null);
+        } finally {
+            setLoading(false);
+        }
+    }
+    useEffect(() => {
+        if (appointmentId) {
+            fetchAppointment();
+        } else {
+            setAppointment(null);
+            setLoading(false);
+            setError("Appointment ID is required");
+        }
+    }, [appointmentId]);
+    return { appointment, loading, error, refetch: fetchAppointment };
 }

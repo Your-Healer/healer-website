@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Sidebar } from "@/components/layout/Sidebar/Sidebar"
+import Sidebar from "@/components/layout/Sidebar/Sidebar"
 import { Header } from "@/components/layout/Header/Header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -86,7 +86,7 @@ export default function DepartmentManagement() {
     // Fetch locations for filter display
     const { locations } = useGetLocations({
         page: 1,
-        limit: 100,
+        limit: 1000,
     })
 
     // Check if filters are active

@@ -15,7 +15,7 @@ import { useSession } from "@/contexts/SessionProvider"
 import logoImage from "@/assets/images/logo.png"
 
 export function Header() {
-    const { account, logout, user } = useSession()
+    const { account, logout, user, staff } = useSession()
     const navigate = useNavigate()
 
     const handleProfile = () => {
@@ -55,7 +55,13 @@ export function Header() {
                             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                                 <Avatar className="h-8 w-8">
                                     <AvatarImage src={account?.avatar} alt={`${user.firstname} ${user.lastname}`} />
-                                    <AvatarFallback>{getInitials(user.firstname, user.lastname)}</AvatarFallback>
+                                    <AvatarFallback>
+                                        {
+                                            account.role?.id === "2" ?
+                                                getInitials(staff?.firstname || '', staff?.lastname || '') :
+                                                getInitials(user.firstname, user?.lastname)
+                                        }
+                                    </AvatarFallback>
                                 </Avatar>
                             </Button>
                         </DropdownMenuTrigger>
@@ -65,9 +71,9 @@ export function Header() {
                                     <p className="text-sm font-medium leading-none">
                                         {user.firstname} {user.lastname}
                                     </p>
-                                    {/* <p className="text-xs leading-none text-muted-foreground">
-                                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                                    </p> */}
+                                    <p className="text-xs leading-none text-muted-foreground">
+                                        {`${account.role?.name?.charAt(0).toUpperCase()}${account.role?.name?.slice(1)}`}
+                                    </p>
                                 </div>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />

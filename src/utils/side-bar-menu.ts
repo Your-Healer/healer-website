@@ -18,95 +18,108 @@ export interface MenuItem {
 	icon: any;
 	role: string;
 	positions: string[] | null;
+	category?: string;
 }
 
 export const adminMenuItems: MenuItem[] = [
 	{
-		href: "/dashboard/",
+		href: "/dashboard",
 		label: "Tổng quan",
 		icon: Home,
 		role: "1",
 		positions: null,
+		category: "main",
 	},
 	{
-		href: "/accounts/",
+		href: "/accounts",
 		label: "Quản lý tài khoản",
 		icon: Settings,
 		role: "1",
 		positions: null,
+		category: "management",
 	},
 	{
-		href: "/staffs/",
+		href: "/staffs",
 		label: "Quản lý nhân sự",
 		icon: Users,
 		role: "1",
 		positions: null,
+		category: "management",
 	},
 	{
-		href: "/patients/",
+		href: "/patients",
 		label: "Quản lý bệnh nhân",
 		icon: UserCheck,
 		role: "1",
 		positions: null,
+		category: "medical",
 	},
 	{
-		href: "/medical-records/",
+		href: "/medical-records",
 		label: "Hồ sơ bệnh án",
 		icon: ClipboardPlus,
 		role: "1",
 		positions: null,
+		category: "medical",
 	},
 	{
-		href: "/departments/",
+		href: "/departments",
 		label: "Khoa khám bệnh",
 		icon: Building2,
 		role: "1",
 		positions: null,
+		category: "facility",
 	},
 	{
-		href: "/rooms/",
+		href: "/rooms",
 		label: "Phòng khám bệnh",
 		icon: Hospital,
 		role: "1",
 		positions: null,
+		category: "facility",
 	},
 	{
-		href: "/services/",
+		href: "/services",
 		label: "Dịch vụ y tế",
 		icon: Stethoscope,
 		role: "1",
 		positions: null,
+		category: "medical",
 	},
 	{
-		href: "/staff/shifts/",
+		href: "/shiftWorkings",
 		label: "Quản lý ca trực",
 		icon: Clock,
 		role: "1",
 		positions: null,
+		category: "operations",
 	},
 	{
-		href: "/appointments/",
+		href: "/appointments",
 		label: "Quản lý lịch hẹn",
 		icon: Calendar,
 		role: "1",
 		positions: null,
+		category: "operations",
 	},
 	{
-		href: "/analytics/",
+		href: "/analytics",
 		label: "Phân tích & Báo cáo",
 		icon: BarChart3,
 		role: "1",
 		positions: null,
+		category: "reports",
 	},
 ];
 
-export const receptionistMenuItems: MenuItem[] = [
+export const staffMenuItems: MenuItem[] = [
 	{
-		href: "/dashboard/",
+		href: "/dashboard",
 		label: "Tổng quan",
 		icon: Home,
 		role: "2",
 		positions: ["1", "3", "4"],
+		category: "main",
 	},
 	{
 		href: "/patients",
@@ -114,6 +127,7 @@ export const receptionistMenuItems: MenuItem[] = [
 		icon: UserCheck,
 		role: "2",
 		positions: ["1", "3", "4"],
+		category: "medical",
 	},
 	{
 		href: "/shifts",
@@ -121,5 +135,22 @@ export const receptionistMenuItems: MenuItem[] = [
 		icon: Clock,
 		role: "2",
 		positions: ["3", "4"],
+		category: "operations",
+	},
+	{
+		href: "/appointments",
+		label: "Quản lý lịch hẹn",
+		icon: Calendar,
+		role: "2",
+		positions: ["1", "3", "4"],
+		category: "operations",
+	},
+	{
+		href: "/analytics",
+		label: "Phân tích & Báo cáo",
+		icon: BarChart3,
+		role: "2",
+		positions: ["1", "3", "4"],
+		category: "reports",
 	},
 ];

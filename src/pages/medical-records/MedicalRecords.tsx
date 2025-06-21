@@ -1,0 +1,105 @@
+"use client";
+import { useState } from "react";
+import { Sidebar } from "@/components/layout/Sidebar/Sidebar";
+import { Header } from "@/components/layout/Header/Header";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { useSession } from "@/contexts/SessionProvider";
+import { ClipboardPlus, Database, GitBranch } from "lucide-react";
+import MedicalRecordsManagement from "@/components/medical-records/MedicalRecordsManagement";
+import BlockchainData from "@/components/medical-records/BlockchainData";
+import DataChangeManagement from "@/components/medical-records/DataChangeManagement";
+
+export default function MedicalRecordsPage() {
+    const { account } = useSession();
+    const [activeTab, setActiveTab] = useState("management");
+
+    return (
+        <div className="flex h-screen bg-gray-50">
+            <Sidebar userRole={account?.role?.id} />
+            <div className="flex-1 flex flex-col overflow-hidden">
+                <Header />
+                <main className="flex-1 overflow-y-auto p-6">
+                    <div className="mb-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h1 className="text-2xl font-bold text-gray-900">
+                                    Quản Lý Hồ Sơ Bệnh Án
+                                </h1>
+                                <p className="text-gray-600">
+                                    Quản lý hồ sơ bệnh án, blockchain và theo dõi thay đổi dữ liệu
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="gap-2">
+                                    <ClipboardPlus className="h-4 w-4" />
+                                    Hồ sơ bệnh án
+                                </Badge>
+                            </div>
+                        </div>
+                    </div>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Hệ Thống Quản Lý Hồ Sơ Bệnh Án</CardTitle>
+                            <CardDescription>
+                                Quản lý toàn diện hồ sơ bệnh án với tích hợp blockchain và theo dõi
+                                thay đổi
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Tabs
+                                value={activeTab}
+                                onValueChange={setActiveTab}
+                                className="w-full"
+                            >
+                                <TabsList className="grid w-full grid-cols-3">
+                                    <TabsTrigger
+                                        value="management"
+                                        className="flex items-center gap-2"
+                                    >
+                                        <ClipboardPlus className="h-4 w-4" />
+                                        Quản Lý Hồ Sơ
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="blockchain"
+                                        className="flex items-center gap-2"
+                                    >
+                                        <Database className="h-4 w-4" />
+                                        Blockchain Data
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="data-changes"
+                                        className="flex items-center gap-2"
+                                    >
+                                        <GitBranch className="h-4 w-4" />
+                                        Theo Dõi Thay Đổi
+                                    </TabsTrigger>
+                                </TabsList>
+
+                                <TabsContent value="management" className="mt-6">
+                                    <MedicalRecordsManagement />
+                                </TabsContent>
+
+                                <TabsContent value="blockchain" className="mt-6">
+                                    <BlockchainData />
+                                </TabsContent>
+
+                                <TabsContent value="data-changes" className="mt-6">
+                                    <DataChangeManagement />
+                                </TabsContent>
+                            </Tabs>
+                        </CardContent>
+                    </Card>
+                </main>
+            </div>
+        </div>
+    );
+}

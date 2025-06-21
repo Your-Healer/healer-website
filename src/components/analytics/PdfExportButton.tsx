@@ -10,7 +10,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Download, FileText, BarChart3, Loader2 } from "lucide-react"
-import { PDFExporter } from "@/libs/pdf-export"
+import { PDFExporter } from "@/lib/pdf-export"
 import { toast } from "sonner"
 
 interface MonthlyData {
