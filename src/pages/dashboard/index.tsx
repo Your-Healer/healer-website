@@ -1,11 +1,21 @@
-import { Navigate } from "@tanstack/react-router";
+import { Navigate, useNavigate } from "@tanstack/react-router";
 import { useSession } from "@/contexts/SessionProvider";
 import { DashboardLoading } from "@/components/loading";
 import AdminDashboard from "./AdminDashboard";
 import DoctorDashboard from "./DoctorDashboard";
+import { useEffect } from "react";
 
 export default function Dashboard() {
     const { isAuthenticated, account, user, staff, isLoading } = useSession();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!isLoading) {
+            if (!isAuthenticated) {
+                navigate({ to: "/sign-in" });
+            }
+        }
+    }, [isAuthenticated, isLoading, navigate]);
 
     // Show loading while checking authentication
     if (isLoading) {

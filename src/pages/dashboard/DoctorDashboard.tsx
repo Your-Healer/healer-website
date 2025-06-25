@@ -1,4 +1,4 @@
-import Sidebar from "@/components/layout/Sidebar/Sidebar"
+import { Sidebar } from "@/components/layout/Sidebar/Sidebar"
 import { Header } from "@/components/layout/Header/Header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,13 +10,14 @@ import { DashboardLoading } from "@/components/loading"
 import { useDoctorDashboard } from "@/hooks/use-statistics"
 import { getAppointmentStatusName } from "@/utils/utils"
 import { APPOINTMENTSTATUS } from "@/utils/enum"
+import { useEffect } from "react"
 
 export default function DoctorDashboard() {
     const { isAuthenticated, user, account, staff, isLoading } = useSession();
     const navigate = useNavigate();
 
     const staffId = staff?.id || '';
-    const { stats, todayAppointments, currentShifts, recentPatients, loading: dashboardLoading, refetch } = useDoctorDashboard(staffId);
+    const { stats, todayAppointments, currentShifts, loading: dashboardLoading, refetch } = useDoctorDashboard(staffId);
 
     console.log('Today Appointments:', todayAppointments);
 
@@ -27,6 +28,14 @@ export default function DoctorDashboard() {
             console.error('Navigation error:', error)
         }
     }
+
+    useEffect(() => {
+        if (!isLoading) {
+            if (!isAuthenticated) {
+                navigate({ to: "/sign-in" });
+            }
+        }
+    }, [isAuthenticated, isLoading, navigate]);
 
     // Show loading while checking authentication
     if (isLoading || dashboardLoading) {
@@ -91,13 +100,6 @@ export default function DoctorDashboard() {
             subtitle: "mỗi bệnh nhân",
             icon: Timer,
             color: "text-blue-600"
-        },
-        {
-            title: "Tỷ Lệ Hài Lòng",
-            value: `${stats.patientSatisfactionRate}%`,
-            subtitle: "đánh giá bệnh nhân",
-            icon: Star,
-            color: "text-yellow-600"
         },
         {
             title: "Ca Làm Việc Hiện Tại",
@@ -287,7 +289,7 @@ export default function DoctorDashboard() {
                                                         </p>
                                                         <div className="flex items-center gap-1 text-sm text-gray-600">
                                                             <Clock className="h-3 w-3" />
-                                                            <span>{formatTime(appointment.bookingTime.medicalRoomTime.fromTime)} - {formatTime(appointment.bookingTime.medicalRoomTime.toTime)}</span>
+                                                            <span>{formatTime(appointment.bookingTime.medicalRoomTime.fromTime.toDateString())} - {formatTime(appointment.bookingTime.medicalRoomTime.toTime.toDateString())}</span>
                                                         </div>
                                                         <div className="flex items-center gap-1 text-xs text-gray-500">
                                                             <MapPin className="h-3 w-3" />
@@ -389,7 +391,7 @@ export default function DoctorDashboard() {
                             </Button>
                         </CardHeader>
                         <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {recentPatients.length > 0 ? (
                                     recentPatients.slice(0, 6).map((patient) => (
                                         <div key={patient.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
@@ -418,7 +420,7 @@ export default function DoctorDashboard() {
                                         <p>Chưa có bệnh nhân nào được khám</p>
                                     </div>
                                 )}
-                            </div>
+                            </div> */}
                         </CardContent>
                     </Card>
                 </main>

@@ -54,7 +54,11 @@ export const useGetTimeSlots = (params: GetTimeSlotsRequest) => {
     const fetchTimeSlots = async () => {
         setLoading(true);
         try {
-            const res = await api.get<PaginationResponse<MedicalRoomTimeWithDetails>>('/medical/slots', { params });
+            const res = await api.get<PaginationResponse<MedicalRoomTimeWithDetails>>('/medical/time-slots', {
+                params: {
+                    ...params,
+                }
+            });
             console.log("Time slots fetched successfully:", res.data);
             setTimeSlots(res.data.data || []);
             setPagination(res.data.meta);
@@ -74,6 +78,6 @@ export const useGetTimeSlots = (params: GetTimeSlotsRequest) => {
 }
 
 export const createTimeSlot = async (data: CreateMedicalRoomTimeRequest) => {
+    console.log('Creating time slot with data:', data);
     return await api.post('/medical/time-slots', data);
 }
-

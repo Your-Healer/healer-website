@@ -73,12 +73,14 @@ export class TransactionService {
 				}
 
 				// Get events for this extrinsic
-				const extrinsicEvents = events.filter((event, eventIndex) => {
-					return (
-						event.phase.isApplyExtrinsic &&
-						event.phase.asApplyExtrinsic.eq(index)
-					);
-				});
+				const extrinsicEvents = (events as any).filter(
+					(event: any, eventIndex: any) => {
+						return (
+							event.phase.isApplyExtrinsic &&
+							event.phase.asApplyExtrinsic.eq(index)
+						);
+					}
+				);
 
 				// Determine transaction status
 				const status = this.getTransactionStatus(extrinsicEvents);
@@ -114,7 +116,7 @@ export class TransactionService {
 		}
 	}
 
-	private getTransactionStatus(events: EventRecord[]): "success" | "failed" {
+	private getTransactionStatus(events: any[]): "success" | "failed" {
 		// Check for ExtrinsicFailed event
 		const failed = events.some(
 			(event) =>

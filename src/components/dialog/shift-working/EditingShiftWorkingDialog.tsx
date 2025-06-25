@@ -147,7 +147,7 @@ export function EditingShiftWorkingDialog({
     const handleInputChange = (field: keyof FormData, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }))
         // Clear error when user starts changing
-        if (errors[field]) {
+        if (errors[field as keyof FormErrors]) {
             setErrors(prev => ({ ...prev, [field]: undefined }))
         }
     }

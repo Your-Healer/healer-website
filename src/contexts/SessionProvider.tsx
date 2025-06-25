@@ -5,6 +5,7 @@ import { LoggedInAccount, LoggedInStaff, LoggedInUser } from "@/models/models"
 import api from "@/api/axios"
 import { LoginEmailRequest, LoginResponse, LoginUsernameRequest } from "@/utils/types"
 import { AuthLoading } from "@/components/loading"
+import axios from "axios"
 
 interface SessionContextType {
     account: LoggedInAccount | null
@@ -107,7 +108,6 @@ export function SessionProvider({ children }: SessionProviderProps) {
                 data: loginResultData
             }
         } catch (error) {
-            console.error("Login error:", error)
             return {
                 success: false,
                 data: null

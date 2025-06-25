@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Sidebar from "@/components/layout/Sidebar/Sidebar"
+import { Sidebar } from "@/components/layout/Sidebar/Sidebar"
 import { Header } from "@/components/layout/Header/Header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -18,6 +18,7 @@ import { useSession } from "@/contexts/SessionProvider"
 import { useNavigate } from "@tanstack/react-router"
 import { useGetMyAccount } from "@/hooks/use-accounts"
 import { PageLoading } from "@/components/loading"
+import AdminDashboard from '../dashboard/AdminDashboard';
 
 export default function ProfilePage() {
     const { account, updateUser, isAuthenticated } = useSession()
@@ -122,10 +123,10 @@ export default function ProfilePage() {
                                                 <h3 className="text-lg font-semibold">
                                                     {getMyAccount?.roleId == "2" ? `${getMyAccount?.staff?.firstname} ${getMyAccount?.staff?.lastname}` : `${getMyAccount?.user?.firstname} ${getMyAccount?.user?.lastname}`}
                                                 </h3>
-                                                <p className="text-gray-600">{getMyAccount.role}</p>
-                                                <Badge variant="secondary" className="mt-1">
-                                                    {getMyAccount.department}
-                                                </Badge>
+                                                <p className="text-gray-600">{getMyAccount?.role?.name}</p>
+                                                {/* <Badge variant="secondary" className="mt-1">
+                                                    {getMyAccount?.staff}
+                                                </Badge> */}
                                             </div>
                                         </div>
 
@@ -136,8 +137,11 @@ export default function ProfilePage() {
                                                 <Label htmlFor="firstName">First Name</Label>
                                                 <Input
                                                     id="firstName"
-                                                    value={getMyAccount.firstName}
-                                                    onChange={(e) => handleInputChange("firstName", e.target.value)}
+                                                    value={account.role?.id === "2" ? getMyAccount?.user?.firstname : getMyAccount?.staff?.firstname}
+                                                    onChange={
+                                                        // (e) => handleInputChange("firstName", e.target.value)
+                                                        () => { }
+                                                    }
                                                     disabled={!isEditing}
                                                 />
                                             </div>
@@ -145,8 +149,11 @@ export default function ProfilePage() {
                                                 <Label htmlFor="lastName">Last Name</Label>
                                                 <Input
                                                     id="lastName"
-                                                    value={getMyAccount.lastName}
-                                                    onChange={(e) => handleInputChange("lastName", e.target.value)}
+                                                    value={account.role?.id === "2" ? getMyAccount?.user?.lastname : getMyAccount?.staff?.lastname}
+                                                    onChange={
+                                                        // (e) => handleInputChange("lastName", e.target.value)
+                                                        () => { }
+                                                    }
                                                     disabled={!isEditing}
                                                 />
                                             </div>
@@ -157,8 +164,11 @@ export default function ProfilePage() {
                                                     <Input
                                                         id="email"
                                                         type="email"
-                                                        value={getMyAccount.email}
-                                                        onChange={(e) => handleInputChange("email", e.target.value)}
+                                                        value={getMyAccount?.email}
+                                                        onChange={
+                                                            // (e) => handleInputChange("email", e.target.value)
+                                                            () => { }
+                                                        }
                                                         disabled={!isEditing}
                                                         className="pl-10"
                                                     />
@@ -170,59 +180,37 @@ export default function ProfilePage() {
                                                     <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                                                     <Input
                                                         id="phone"
-                                                        value={getMyAccount.phone}
-                                                        onChange={(e) => handleInputChange("phone", e.target.value)}
+                                                        value={getMyAccount?.phoneNumber}
+                                                        onChange={
+                                                            // (e) => handleInputChange("phone", e.target.value)
+                                                            () => { }
+                                                        }
                                                         disabled={!isEditing}
                                                         className="pl-10"
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                                                <div className="relative">
-                                                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                                                    <Input
-                                                        id="dateOfBirth"
-                                                        type="date"
-                                                        value={getMyAccount.dateOfBirth}
-                                                        onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                                        </div>
+
+                                        {
+                                            getMyAccount?.roleId === "2" && (
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="introduction">Bio</Label>
+                                                    <Textarea
+                                                        id="introduction"
+                                                        value={getMyAccount.staff?.introduction}
+                                                        onChange={
+                                                            // (e) => handleInputChange("introduction", e.target.value)
+                                                            () => { }
+                                                        }
                                                         disabled={!isEditing}
-                                                        className="pl-10"
+                                                        rows={4}
+                                                        placeholder="Tell us about yourself..."
                                                     />
                                                 </div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="employeeId">Employee ID</Label>
-                                                <Input id="employeeId" value={getMyAccount.employeeId} disabled className="bg-gray-50" />
-                                            </div>
-                                        </div>
+                                            )
+                                        }
 
-                                        <div className="space-y-2">
-                                            <Label htmlFor="address">Address</Label>
-                                            <div className="relative">
-                                                <MapPin className="absolute left-3 top-3 text-gray-400 h-4 w-4" />
-                                                <Textarea
-                                                    id="address"
-                                                    value={getMyAccount.address}
-                                                    onChange={(e) => handleInputChange("address", e.target.value)}
-                                                    disabled={!isEditing}
-                                                    className="pl-10"
-                                                    rows={3}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label htmlFor="bio">Bio</Label>
-                                            <Textarea
-                                                id="bio"
-                                                value={getMyAccount.bio}
-                                                onChange={(e) => handleInputChange("bio", e.target.value)}
-                                                disabled={!isEditing}
-                                                rows={4}
-                                                placeholder="Tell us about yourself..."
-                                            />
-                                        </div>
                                     </CardContent>
                                 </Card>
                             </TabsContent>
@@ -237,12 +225,8 @@ export default function ProfilePage() {
                                         <CardContent className="space-y-6">
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 <div className="space-y-2">
-                                                    <Label htmlFor="employeeId">Employee ID</Label>
-                                                    <Input id="employeeId" value={getMyAccount.employeeId} disabled className="bg-gray-50" />
-                                                </div>
-                                                <div className="space-y-2">
                                                     <Label htmlFor="role">Role</Label>
-                                                    <Select value={getMyAccount.role} disabled={!isEditing}>
+                                                    <Select value={getMyAccount?.role?.name} disabled={!isEditing}>
                                                         <SelectTrigger>
                                                             <SelectValue />
                                                         </SelectTrigger>
@@ -254,29 +238,11 @@ export default function ProfilePage() {
                                                         </SelectContent>
                                                     </Select>
                                                 </div>
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="department">Department</Label>
-                                                    <Select value={getMyAccount.department} disabled={!isEditing}>
-                                                        <SelectTrigger>
-                                                            <SelectValue />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="Administration">Administration</SelectItem>
-                                                            <SelectItem value="Cardiology">Cardiology</SelectItem>
-                                                            <SelectItem value="Emergency">Emergency</SelectItem>
-                                                            <SelectItem value="Pediatrics">Pediatrics</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="joinDate">Join Date</Label>
-                                                    <Input id="joinDate" type="date" value={getMyAccount.joinDate} disabled className="bg-gray-50" />
-                                                </div>
                                             </div>
 
                                             <Separator />
 
-                                            <div className="space-y-4">
+                                            {/* <div className="space-y-4">
                                                 <h4 className="text-sm font-medium">Permissions & Access</h4>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     {getPermissionBadges().map((perm, index) => {
@@ -292,7 +258,7 @@ export default function ProfilePage() {
                                                         )
                                                     })}
                                                 </div>
-                                            </div>
+                                            </div> */}
                                         </CardContent>
                                     </Card>
                                 </TabsContent>

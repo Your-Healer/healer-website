@@ -1,4 +1,4 @@
-import Sidebar from "@/components/layout/Sidebar/Sidebar"
+import { Sidebar } from "@/components/layout/Sidebar/Sidebar"
 import { Header } from "@/components/layout/Header/Header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,7 @@ import { useAdminDashboard } from "@/hooks/use-statistics"
 import { getAppointmentStatusName } from "@/utils/utils"
 import { APPOINTMENTSTATUS } from "@/utils/enum"
 import { convertToVietnameseDate } from "@/lib/utils"
+import { useEffect } from "react"
 
 export default function AdminDashboard() {
     const { isAuthenticated, user, account, isLoading } = useSession();
@@ -24,6 +25,14 @@ export default function AdminDashboard() {
             console.error('Navigation error:', error)
         }
     }
+
+    useEffect(() => {
+        if (!isLoading) {
+            if (!isAuthenticated) {
+                navigate({ to: "/sign-in" });
+            }
+        }
+    }, [isAuthenticated, isLoading, navigate]);
 
     // Show loading while checking authentication
     if (isLoading || dashboardLoading) {

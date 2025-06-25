@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback } from "react"
-import Sidebar from "@/components/layout/Sidebar/Sidebar"
+import { Sidebar } from "@/components/layout/Sidebar/Sidebar"
 import { Header } from "@/components/layout/Header/Header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -28,9 +28,10 @@ import { Pagination } from "@/components/ui/pagination"
 import { SelectDepartments } from "@/components/select/SelectDepartments"
 import { useGetDepartments } from "@/hooks/use-departments"
 import { getDepartmentName } from "@/utils/utils"
+import { useNavigate } from "@tanstack/react-router"
 
 export default function PatientManagement() {
-    const { user, account } = useSession()
+    const { user, account, isLoading, isAuthenticated } = useSession()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
     const [editingPatient, setEditingPatient] = useState<PatientWithDetails | null>(null)
@@ -41,6 +42,16 @@ export default function PatientManagement() {
     const [currentPage, setCurrentPage] = useState(1)
     const [itemsPerPage, setItemsPerPage] = useState(10)
     const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        if (!isLoading) {
+            if (!isAuthenticated) {
+                navigate({ to: "/sign-in" });
+            }
+        }
+    }, [isAuthenticated, isLoading, navigate]);
 
     // Debounce search term
     useEffect(() => {
@@ -257,9 +268,6 @@ export default function PatientManagement() {
                                                         <div className="flex flex-col">
                                                             <span className="font-semibold">
                                                                 {`${patient.firstname} ${patient.lastname}`}
-                                                            </span>
-                                                            <span className="text-sm text-gray-500">
-                                                                ID: {patient.id}
                                                             </span>
                                                         </div>
                                                     </TableCell>
@@ -500,10 +508,6 @@ export default function PatientManagement() {
                                             <div>
                                                 <Label className="font-semibold text-sm">Họ và tên</Label>
                                                 <p className="text-sm">{`${viewingPatient.firstname} ${viewingPatient.lastname}`}</p>
-                                            </div>
-                                            <div>
-                                                <Label className="font-semibold text-sm">ID bệnh nhân</Label>
-                                                <p className="text-sm">{viewingPatient.id}</p>
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">

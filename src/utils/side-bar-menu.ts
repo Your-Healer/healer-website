@@ -102,14 +102,14 @@ export const adminMenuItems: MenuItem[] = [
 		positions: null,
 		category: "operations",
 	},
-	{
-		href: "/analytics",
-		label: "Phân tích & Báo cáo",
-		icon: BarChart3,
-		role: "1",
-		positions: null,
-		category: "reports",
-	},
+	// {
+	// 	href: "/analytics",
+	// 	label: "Phân tích & Báo cáo",
+	// 	icon: BarChart3,
+	// 	role: "1",
+	// 	positions: null,
+	// 	category: "reports",
+	// },
 ];
 
 export const staffMenuItems: MenuItem[] = [
@@ -145,12 +145,12 @@ export const staffMenuItems: MenuItem[] = [
 		positions: ["1", "3", "4"],
 		category: "operations",
 	},
-	{
-		href: "/analytics",
-		label: "Phân tích & Báo cáo",
-		icon: BarChart3,
-		role: "2",
-		positions: ["1", "3", "4"],
-		category: "reports",
-	},
+	// {
+	// 	href: "/analytics",
+	// 	label: "Phân tích & Báo cáo",
+	// 	icon: BarChart3,
+	// 	role: "2",
+	// 	positions: ["1", "3", "4"],
+	// 	category: "reports",
+	// },
 ];

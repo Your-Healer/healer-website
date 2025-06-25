@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Sidebar } from "@/components/layout/Sidebar/Sidebar";
 import { Header } from "@/components/layout/Header/Header";
 import {
@@ -16,10 +16,21 @@ import { ClipboardPlus, Database, GitBranch } from "lucide-react";
 import MedicalRecordsManagement from "@/components/medical-records/MedicalRecordsManagement";
 import BlockchainData from "@/components/medical-records/BlockchainData";
 import DataChangeManagement from "@/components/medical-records/DataChangeManagement";
+import { useNavigate } from "@tanstack/react-router";
 
 export default function MedicalRecordsPage() {
-    const { account } = useSession();
+    const { account, isLoading, isAuthenticated } = useSession();
     const [activeTab, setActiveTab] = useState("management");
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!isLoading) {
+            if (!isAuthenticated) {
+                navigate({ to: "/sign-in" });
+            }
+        }
+    }, [isAuthenticated, isLoading, navigate]);
 
     return (
         <div className="flex h-screen bg-gray-50">

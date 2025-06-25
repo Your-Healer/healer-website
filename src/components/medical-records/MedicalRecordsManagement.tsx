@@ -241,12 +241,6 @@ export default function MedicalRecordsManagement() {
                     <TableBody>
                         {filteredRecords.map((record) => (
                             <TableRow key={record.id}>
-                                <TableCell className="font-medium">
-                                    <div>
-                                        <p className="font-medium">{record.patientName}</p>
-                                        <p className="text-sm text-gray-500">ID: {record.patientId}</p>
-                                    </div>
-                                </TableCell>
                                 <TableCell>{record.diagnosis}</TableCell>
                                 <TableCell>{record.doctorName}</TableCell>
                                 <TableCell>{record.department}</TableCell>

@@ -1,14 +1,12 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import Sidebar from "@/components/layout/Sidebar/Sidebar"
-import { useNavigate } from "@tanstack/react-router"
+import { Sidebar } from "@/components/layout/Sidebar/Sidebar"
 import { Header } from "@/components/layout/Header/Header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
     AlertDialog,
@@ -44,9 +42,10 @@ import { SelectStaffs } from "@/components/select/SelectStaffs"
 import { SelectDepartments } from "@/components/select/SelectDepartments"
 import { useGetDepartments } from "@/hooks/use-departments"
 import { useGetStaffs } from "@/hooks/use-staffs"
+import { useNavigate } from "@tanstack/react-router"
 
 export default function AppointmentManagement() {
-    const { account, staff } = useSession()
+    const { account, staff, isLoading, isAuthenticated } = useSession()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [editingAppointment, setEditingAppointment] = useState<AppointmentWithDetails | null>(null)
     const [searchTerm, setSearchTerm] = useState("")
@@ -59,6 +58,16 @@ export default function AppointmentManagement() {
     const [currentPage, setCurrentPage] = useState(1)
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        if (!isLoading) {
+            if (!isAuthenticated) {
+                navigate({ to: "/sign-in" });
+            }
+        }
+    }, [isAuthenticated, isLoading, navigate]);
 
     useEffect(() => {
         const timer = setTimeout(() => {

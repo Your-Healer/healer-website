@@ -20,7 +20,7 @@ import { Pagination } from "@/components/ui/pagination"
 import { EditingAccountDialog } from "@/components/dialog/accounts/EditingAccountDialog"
 
 export default function AccountManagement() {
-  const { account } = useSession()
+  const { account, isLoading, isAuthenticated } = useSession()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingAccount, setEditingAccount] = useState<AccountWithDetails | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
@@ -31,6 +31,14 @@ export default function AccountManagement() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        navigate({ to: "/sign-in" });
+      }
+    }
+  }, [isAuthenticated, isLoading, navigate]);
 
   // Debounce search term
   useEffect(() => {

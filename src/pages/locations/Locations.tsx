@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import Sidebar from "@/components/layout/Sidebar/Sidebar"
+import { Sidebar } from "@/components/layout/Sidebar/Sidebar"
 import { Header } from "@/components/layout/Header/Header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -25,6 +25,7 @@ import { LocationWithDetails } from "@/models/models"
 import { TableLoading, ButtonLoading } from "@/components/loading"
 import { toast } from "sonner"
 import { Pagination } from "@/components/ui/pagination"
+import { useNavigate } from "@tanstack/react-router"
 
 interface LocationFormData {
     name: string
@@ -37,7 +38,7 @@ interface LocationFormData {
 }
 
 export default function LocationsPage() {
-    const { account } = useSession()
+    const { account, isLoading, isAuthenticated } = useSession()
 
     // State management
     const [currentPage, setCurrentPage] = useState(1)
@@ -50,6 +51,8 @@ export default function LocationsPage() {
     const [editingLocation, setEditingLocation] = useState<LocationWithDetails | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
+    const navigate = useNavigate()
+
     // Form data
     const [formData, setFormData] = useState<LocationFormData>({
         name: "",
@@ -60,6 +63,14 @@ export default function LocationsPage() {
         lat: null,
         lng: null,
     })
+
+    useEffect(() => {
+        if (!isLoading) {
+            if (!isAuthenticated) {
+                navigate({ to: "/sign-in" });
+            }
+        }
+    }, [isAuthenticated, isLoading, navigate]);
 
     // Debounce search term
     useEffect(() => {
