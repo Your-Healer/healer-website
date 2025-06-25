@@ -36,7 +36,7 @@ export default function AppLayout({ children, breadcrumbs = [] }: AppLayoutProps
                 <main className="flex-1 overflow-y-auto">
                     {/* Breadcrumb Header */}
                     {breadcrumbs.length > 0 && (
-                        <div className="bg-white border-b border-gray-200 px-6 py-4">
+                        <div className="bg-white border-b border-gray-200 px-6 py-3">
                             <Breadcrumb>
                                 <BreadcrumbList>
                                     {breadcrumbs.map((breadcrumb, index) => (
@@ -49,11 +49,11 @@ export default function AppLayout({ children, breadcrumbs = [] }: AppLayoutProps
                                                 <>
                                                     <BreadcrumbLink
                                                         href={breadcrumb.href}
-                                                        className="text-gray-600 hover:text-gray-900 transition-colors"
+                                                        className="text-gray-600 hover:text-gray-900"
                                                     >
                                                         {breadcrumb.label}
                                                     </BreadcrumbLink>
-                                                    <BreadcrumbSeparator className="text-gray-400" />
+                                                    <BreadcrumbSeparator />
                                                 </>
                                             )}
                                         </BreadcrumbItem>

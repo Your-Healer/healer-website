@@ -62,11 +62,11 @@ export class BlockService {
 		}
 	}
 
-	private async getBlockTimestamp(signedBlock: SignedBlock): Promise<string> {
+	private async getBlockTimestamp(signedBlock: any): Promise<string> {
 		try {
 			// Look for timestamp extrinsic
 			const timestampExtrinsic = signedBlock.block.extrinsics.find(
-				(extrinsic) =>
+				(extrinsic: any) =>
 					extrinsic.method.section === "timestamp" &&
 					extrinsic.method.method === "set"
 			);
@@ -90,7 +90,7 @@ export class BlockService {
 		let unsubscribe: () => void = () => {};
 
 		api.rpc.chain
-			.subscribeNewHeads(async (header: Header) => {
+			.subscribeNewHeads(async (header: any) => {
 				try {
 					const blockData = await this.getBlockData(header.number.toNumber());
 					if (blockData) {

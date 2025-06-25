@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import Sidebar from "@/components/layout/Sidebar/Sidebar"
+import { useEffect, useState } from "react"
+import { Sidebar } from "@/components/layout/Sidebar/Sidebar"
 import { Header } from "@/components/layout/Header/Header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -19,19 +19,21 @@ import {
 } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Edit, Trash2, MapPin, Building, Users, Search, RefreshCw, X } from "lucide-react"
+import { Plus, Edit, Trash2, MapPin, Building, Users, Search, RefreshCw, X, Eye, Clock, Calendar, ChevronRight } from "lucide-react"
 import { useSession } from "@/contexts/SessionProvider"
-import { useGetMedicalRooms } from "@/hooks/use-medical"
-import { MedicalRoomWithDetails, DepartmentWithDetails, ServiceWithDetails } from "@/models/models"
-import { CreateMedicalRoomRequest, UpdateMedicalRoomRequest, GetMedicalRoomRequest } from "@/utils/types"
+import { useGetMedicalRooms, useGetTimeSlots, createTimeSlot } from "@/hooks/use-medical"
+import { MedicalRoomWithDetails, DepartmentWithDetails, ServiceWithDetails, MedicalRoomTimeWithDetails } from "@/models/models"
+import { CreateMedicalRoomRequest, UpdateMedicalRoomRequest, GetMedicalRoomRequest, CreateMedicalRoomTimeRequest } from "@/utils/types"
 import api from "@/api/axios"
 import { toast } from "sonner"
 import { APPOINTMENTSTATUS } from "@/utils/enum"
-import { TableLoading } from "@/components/loading"
+import { TableLoading, ButtonLoading } from "@/components/loading"
 import { SelectDepartments } from "@/components/select/SelectDepartments"
 import { SelectServices } from "@/components/select/SelectServices"
 import { useGetDepartments } from "@/hooks/use-departments"
 import { useGetServices } from "@/hooks/use-services"
+import { ViewRoomTimesDialog } from "@/components/dialog/room-times/ViewRoomTimesDialog"
+import { useNavigate } from "@tanstack/react-router"
 
 interface MedicalRoomFormData {
     name: string
@@ -40,8 +42,14 @@ interface MedicalRoomFormData {
     floor: number
 }
 
+interface TimeSlotFormData {
+    fromTime: string
+    toTime: string
+    date: string
+}
+
 export default function MedicalRoomsPage() {
-    const { user, account } = useSession()
+    const { user, account, isLoading, isAuthenticated } = useSession()
 
     // Pagination and filters state
     const [currentPage, setCurrentPage] = useState(1)
@@ -54,7 +62,11 @@ export default function MedicalRoomsPage() {
     // Dialog states
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+    const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+    const [isTimeSlotDialogOpen, setIsTimeSlotDialogOpen] = useState(false)
+    const [isViewTimesDialogOpen, setIsViewTimesDialogOpen] = useState(false)
     const [selectedRoom, setSelectedRoom] = useState<MedicalRoomWithDetails | null>(null)
+    const [viewingRoom, setViewingRoom] = useState<MedicalRoomWithDetails | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     // Form data
@@ -63,6 +75,22 @@ export default function MedicalRoomsPage() {
         departmentId: "",
         serviceId: "",
         floor: 1,
+    })
+
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        if (!isLoading) {
+            if (!isAuthenticated) {
+                navigate({ to: "/sign-in" });
+            }
+        }
+    }, [isAuthenticated, isLoading, navigate]);
+
+    const [timeSlotFormData, setTimeSlotFormData] = useState<TimeSlotFormData>({
+        fromTime: "",
+        toTime: "",
+        date: ""
     })
 
     // Remove departments state since we'll use the hook
@@ -91,6 +119,15 @@ export default function MedicalRoomsPage() {
 
     // Fetch medical rooms
     const { medicalRooms, pagination, loading, refetch } = useGetMedicalRooms(apiParams)
+
+    // Fetch time slots for selected room
+    const { timeSlots, loading: timeSlotsLoading, refetch: refetchTimeSlots } = useGetTimeSlots({
+        page: 1,
+        limit: 100,
+        filter: {
+            roomId: selectedRoom?.id
+        }
+    })
 
     // Check if filters are active
     const hasActiveFilters = searchTerm || filterDepartment !== "all" || filterService !== "all" || filterFloor !== "all"
@@ -193,6 +230,78 @@ export default function MedicalRoomsPage() {
         }
     }
 
+    const handleViewRoom = (room: MedicalRoomWithDetails) => {
+        setViewingRoom(room)
+        setIsViewDialogOpen(true)
+    }
+
+    const handleManageTimeSlots = (room: MedicalRoomWithDetails) => {
+        setSelectedRoom(room)
+        setIsTimeSlotDialogOpen(true)
+    }
+
+    const handleViewRoomTimes = (room: MedicalRoomWithDetails) => {
+        setSelectedRoom(room)
+        setIsViewTimesDialogOpen(true)
+    }
+
+    const resetTimeSlotForm = () => {
+        setTimeSlotFormData({
+            fromTime: "",
+            toTime: "",
+            date: ""
+        })
+    }
+
+    const handleAddTimeSlot = async () => {
+        if (!selectedRoom || !timeSlotFormData.date || !timeSlotFormData.fromTime || !timeSlotFormData.toTime) {
+            toast.error("Vui lòng điền đầy đủ thông tin")
+            return
+        }
+
+        if (timeSlotFormData.fromTime >= timeSlotFormData.toTime) {
+            toast.error("Thời gian kết thúc phải sau thời gian bắt đầu")
+            return
+        }
+
+        setIsSubmitting(true)
+        try {
+            const fromDateTime = new Date(`${timeSlotFormData.date}T${timeSlotFormData.fromTime}:00`)
+            const toDateTime = new Date(`${timeSlotFormData.date}T${timeSlotFormData.toTime}:00`)
+
+            const requestData: CreateMedicalRoomTimeRequest = {
+                roomId: selectedRoom.id,
+                fromTime: fromDateTime,
+                toTime: toDateTime
+            }
+
+            await createTimeSlot(requestData)
+            toast.success("Tạo khung giờ thành công")
+            resetTimeSlotForm()
+            refetchTimeSlots()
+        } catch (error: any) {
+            console.error("Error creating time slot:", error)
+            toast.error(error.response?.data?.message || "Không thể tạo khung giờ")
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    const handleDeleteTimeSlot = async (timeSlotId: string) => {
+        if (!confirm("Bạn có chắc chắn muốn xóa khung giờ này không?")) {
+            return
+        }
+
+        try {
+            await api.delete(`/medical/time-slots/${timeSlotId}`)
+            toast.success("Xóa khung giờ thành công")
+            refetchTimeSlots()
+        } catch (error: any) {
+            console.error("Error deleting time slot:", error)
+            toast.error(error.response?.data?.message || "Không thể xóa khung giờ")
+        }
+    }
+
     const handlePageChange = (page: number) => {
         setCurrentPage(page)
     }
@@ -238,6 +347,23 @@ export default function MedicalRoomsPage() {
         if (serviceId === "all") return "Tất cả dịch vụ"
         const service = services?.find(s => s.id === serviceId)
         return service?.name || "Không xác định"
+    }
+
+    const formatDateTime = (dateTime: Date) => {
+        return new Intl.DateTimeFormat('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }).format(new Date(dateTime))
+    }
+
+    const formatTime = (dateTime: Date) => {
+        return new Intl.DateTimeFormat('vi-VN', {
+            hour: '2-digit',
+            minute: '2-digit'
+        }).format(new Date(dateTime))
     }
 
     return (
@@ -472,13 +598,14 @@ export default function MedicalRoomsPage() {
                                                 <TableHead>Tầng</TableHead>
                                                 <TableHead>Trạng thái</TableHead>
                                                 <TableHead>Lịch hẹn hiện tại</TableHead>
+                                                <TableHead>Khung giờ</TableHead>
                                                 <TableHead>Thao tác</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {medicalRooms.length === 0 ? (
                                                 <TableRow>
-                                                    <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                                                    <TableCell colSpan={8} className="text-center py-8 text-gray-500">
                                                         Không tìm thấy phòng khám nào
                                                     </TableCell>
                                                 </TableRow>
@@ -506,7 +633,21 @@ export default function MedicalRoomsPage() {
                                                             </div>
                                                         </TableCell>
                                                         <TableCell>
-                                                            <div className="flex gap-2">
+                                                            <div className="flex items-center gap-1">
+                                                                <Clock className="h-4 w-4 text-gray-400" />
+                                                                {room.times?.length || 0} khung giờ
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <div className="flex gap-1">
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    onClick={() => handleViewRoom(room)}
+                                                                    title="Xem chi tiết"
+                                                                >
+                                                                    <Eye className="h-4 w-4" />
+                                                                </Button>
                                                                 <Button
                                                                     size="sm"
                                                                     variant="outline"
@@ -514,6 +655,23 @@ export default function MedicalRoomsPage() {
                                                                     title="Chỉnh sửa"
                                                                 >
                                                                     <Edit className="h-4 w-4" />
+                                                                </Button>
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    onClick={() => handleManageTimeSlots(room)}
+                                                                    title="Quản lý khung giờ"
+                                                                >
+                                                                    <Clock className="h-4 w-4" />
+                                                                </Button>
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    onClick={() => handleViewRoomTimes(room)}
+                                                                    title="Xem chi tiết khung giờ"
+                                                                    className="text-blue-600 hover:text-blue-700"
+                                                                >
+                                                                    <Calendar className="h-4 w-4" />
                                                                 </Button>
                                                                 <Button
                                                                     size="sm"
@@ -550,6 +708,333 @@ export default function MedicalRoomsPage() {
                             )}
                         </CardContent>
                     </Card>
+
+                    {/* View Room Dialog */}
+                    <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+                        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle>Chi Tiết Phòng Khám</DialogTitle>
+                                <DialogDescription>Thông tin chi tiết về phòng khám</DialogDescription>
+                            </DialogHeader>
+                            {viewingRoom && (
+                                <div className="grid gap-6 py-4">
+                                    {/* Basic Information */}
+                                    <div className="space-y-3">
+                                        <h4 className="font-medium text-gray-900 border-b pb-1">Thông Tin Cơ Bản</h4>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <Label className="font-semibold text-sm">Tên phòng</Label>
+                                                <p className="text-sm">{viewingRoom.name}</p>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <Label className="font-semibold text-sm">Khoa</Label>
+                                                <p className="text-sm">{viewingRoom.department?.name || "Không xác định"}</p>
+                                            </div>
+                                            <div>
+                                                <Label className="font-semibold text-sm">Dịch vụ</Label>
+                                                <p className="text-sm">{viewingRoom.service?.name || "Không xác định"}</p>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <Label className="font-semibold text-sm">Tầng</Label>
+                                                <p className="text-sm">Tầng {viewingRoom.floor}</p>
+                                            </div>
+                                            <div>
+                                                <Label className="font-semibold text-sm">Trạng thái</Label>
+                                                <div className="mt-1">{getRoomStatusBadge(viewingRoom)}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Department Information */}
+                                    {viewingRoom.department && (
+                                        <div className="space-y-3">
+                                            <h4 className="font-medium text-gray-900 border-b pb-1">Thông Tin Khoa</h4>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <Label className="font-semibold text-sm">Tên khoa</Label>
+                                                    <p className="text-sm">{viewingRoom.department.name}</p>
+                                                </div>
+                                                <div>
+                                                    <Label className="font-semibold text-sm">Ký hiệu</Label>
+                                                    <p className="text-sm">{viewingRoom.department.symbol}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Service Information */}
+                                    {viewingRoom.service && (
+                                        <div className="space-y-3">
+                                            <h4 className="font-medium text-gray-900 border-b pb-1">Thông Tin Dịch Vụ</h4>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <Label className="font-semibold text-sm">Tên dịch vụ</Label>
+                                                    <p className="text-sm">{viewingRoom.service.name}</p>
+                                                </div>
+                                                <div>
+                                                    <Label className="font-semibold text-sm">Thời gian khám</Label>
+                                                    <p className="text-sm">{viewingRoom.service.durationTime} phút</p>
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <Label className="font-semibold text-sm">Giá dịch vụ</Label>
+                                                    <p className="text-sm">{viewingRoom.service.price?.toLocaleString('vi-VN')} VNĐ</p>
+                                                </div>
+                                                <div>
+                                                    <Label className="font-semibold text-sm">Mô tả</Label>
+                                                    <p className="text-sm">{viewingRoom.service.description || "Không có mô tả"}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Time Slots */}
+                                    <div className="space-y-3">
+                                        <h4 className="font-medium text-gray-900 border-b pb-1">Khung Giờ Làm Việc</h4>
+                                        <div>
+                                            {viewingRoom.times && viewingRoom.times.length > 0 ? (
+                                                <div className="space-y-2">
+                                                    <p className="text-sm font-medium">
+                                                        Tổng số khung giờ: {viewingRoom.times.length}
+                                                    </p>
+                                                    <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+                                                        {viewingRoom.times.slice(0, 10).map((time, index) => (
+                                                            <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                                                                <Clock className="h-3 w-3 text-gray-500" />
+                                                                <span className="text-xs">
+                                                                    {formatTime(time.fromTime)} - {formatTime(time.toTime)}
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                    {viewingRoom.times.length > 10 && (
+                                                        <p className="text-xs text-gray-500">
+                                                            và {viewingRoom.times.length - 10} khung giờ khác...
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <p className="text-sm text-gray-500">Chưa có khung giờ nào</p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Appointments */}
+                                    <div className="space-y-3">
+                                        <h4 className="font-medium text-gray-900 border-b pb-1">Lịch Hẹn</h4>
+                                        <div>
+                                            {viewingRoom.appointments && viewingRoom.appointments.length > 0 ? (
+                                                <div className="space-y-2">
+                                                    <p className="text-sm font-medium">
+                                                        Tổng số lịch hẹn: {viewingRoom.appointments.length}
+                                                    </p>
+                                                    <div className="flex gap-2">
+                                                        <Badge className="bg-blue-100 text-blue-800">
+                                                            Đã đặt: {viewingRoom.appointments.filter(apt => apt.status === APPOINTMENTSTATUS.BOOKED).length}
+                                                        </Badge>
+                                                        <Badge className="bg-green-100 text-green-800">
+                                                            Đã thanh toán: {viewingRoom.appointments.filter(apt => apt.status === APPOINTMENTSTATUS.PAID).length}
+                                                        </Badge>
+                                                        <Badge className="bg-yellow-100 text-yellow-800">
+                                                            Chờ xử lý: {viewingRoom.appointments.filter(apt => apt.status === APPOINTMENTSTATUS.IDLE).length}
+                                                        </Badge>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <p className="text-sm text-gray-500">Chưa có lịch hẹn nào</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            <div className="flex justify-end gap-2 mt-4">
+                                <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+                                    Đóng
+                                </Button>
+                                <Button onClick={() => {
+                                    setIsViewDialogOpen(false)
+                                    if (viewingRoom) handleViewRoomTimes(viewingRoom)
+                                }}>
+                                    <Calendar className="h-4 w-4 mr-2" />
+                                    Xem chi tiết khung giờ
+                                </Button>
+                                <Button onClick={() => {
+                                    setIsViewDialogOpen(false)
+                                    if (viewingRoom) handleManageTimeSlots(viewingRoom)
+                                }}>
+                                    <Clock className="h-4 w-4 mr-2" />
+                                    Quản lý khung giờ
+                                </Button>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+
+                    {/* Time Slot Management Dialog */}
+                    <Dialog open={isTimeSlotDialogOpen} onOpenChange={setIsTimeSlotDialogOpen}>
+                        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle>Quản Lý Khung Giờ - {selectedRoom?.name}</DialogTitle>
+                                <DialogDescription>
+                                    Thêm và quản lý khung giờ làm việc cho phòng khám
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            <div className="grid gap-6 py-4">
+                                {/* Add Time Slot Form */}
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="text-lg">Thêm Khung Giờ Mới</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="grid grid-cols-3 gap-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="date">Ngày *</Label>
+                                                <Input
+                                                    id="date"
+                                                    type="date"
+                                                    value={timeSlotFormData.date}
+                                                    onChange={(e) => setTimeSlotFormData(prev => ({ ...prev, date: e.target.value }))}
+                                                    min={new Date().toISOString().split('T')[0]}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="fromTime">Giờ bắt đầu *</Label>
+                                                <Input
+                                                    id="fromTime"
+                                                    type="time"
+                                                    value={timeSlotFormData.fromTime}
+                                                    onChange={(e) => setTimeSlotFormData(prev => ({ ...prev, fromTime: e.target.value }))}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="toTime">Giờ kết thúc *</Label>
+                                                <Input
+                                                    id="toTime"
+                                                    type="time"
+                                                    value={timeSlotFormData.toTime}
+                                                    onChange={(e) => setTimeSlotFormData(prev => ({ ...prev, toTime: e.target.value }))}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <Button onClick={handleAddTimeSlot} disabled={isSubmitting}>
+                                                {isSubmitting ? (
+                                                    <ButtonLoading message="Đang thêm..." />
+                                                ) : (
+                                                    <>
+                                                        <Plus className="h-4 w-4 mr-2" />
+                                                        Thêm Khung Giờ
+                                                    </>
+                                                )}
+                                            </Button>
+                                            <Button variant="outline" onClick={resetTimeSlotForm}>
+                                                Đặt lại
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+
+                                {/* Time Slots List */}
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="text-lg">Danh Sách Khung Giờ</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {timeSlotsLoading ? (
+                                            <TableLoading />
+                                        ) : (
+                                            <>
+                                                <Table>
+                                                    <TableHeader>
+                                                        <TableRow>
+                                                            <TableHead>Ngày</TableHead>
+                                                            <TableHead>Thời gian</TableHead>
+                                                            <TableHead>Trạng thái</TableHead>
+                                                            <TableHead>Lịch hẹn</TableHead>
+                                                            <TableHead>Thao tác</TableHead>
+                                                        </TableRow>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                        {timeSlots.length === 0 ? (
+                                                            <TableRow>
+                                                                <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                                                                    Chưa có khung giờ nào
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ) : (
+                                                            timeSlots.map((timeSlot) => {
+                                                                const isAvailable = !timeSlot.bookings || timeSlot.bookings.length === 0
+                                                                const isPast = new Date(timeSlot.toTime) < new Date()
+
+                                                                return (
+                                                                    <TableRow key={timeSlot.id}>
+                                                                        <TableCell>
+                                                                            <div className="flex items-center gap-2">
+                                                                                <Calendar className="h-4 w-4 text-gray-400" />
+                                                                                {new Date(timeSlot.fromTime).toLocaleDateString('vi-VN')}
+                                                                            </div>
+                                                                        </TableCell>
+                                                                        <TableCell>
+                                                                            <div className="flex items-center gap-2">
+                                                                                <Clock className="h-4 w-4 text-gray-400" />
+                                                                                {formatTime(timeSlot.fromTime)} - {formatTime(timeSlot.toTime)}
+                                                                            </div>
+                                                                        </TableCell>
+                                                                        <TableCell>
+                                                                            <Badge variant={
+                                                                                isPast ? "outline" :
+                                                                                    isAvailable ? "secondary" : "default"
+                                                                            }>
+                                                                                {isPast ? "Đã qua" :
+                                                                                    isAvailable ? "Trống" : "Đã đặt"}
+                                                                            </Badge>
+                                                                        </TableCell>
+                                                                        <TableCell>
+                                                                            <div className="flex items-center gap-1">
+                                                                                <Users className="h-4 w-4 text-gray-400" />
+                                                                                {timeSlot.bookings?.length || 0}
+                                                                            </div>
+                                                                        </TableCell>
+                                                                        <TableCell>
+                                                                            <Button
+                                                                                size="sm"
+                                                                                variant="outline"
+                                                                                className="text-red-600 hover:text-red-700"
+                                                                                onClick={() => handleDeleteTimeSlot(timeSlot.id)}
+                                                                                disabled={!isAvailable}
+                                                                                title={!isAvailable ? "Không thể xóa khung giờ đã có lịch hẹn" : "Xóa khung giờ"}
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </TableCell>
+                                                                    </TableRow>
+                                                                )
+                                                            })
+                                                        )}
+                                                    </TableBody>
+                                                </Table>
+                                            </>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            </div>
+
+                            <div className="flex justify-end gap-2 mt-4">
+                                <Button variant="outline" onClick={() => {
+                                    setIsTimeSlotDialogOpen(false)
+                                    setSelectedRoom(null)
+                                    resetTimeSlotForm()
+                                }}>
+                                    Đóng
+                                </Button>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
 
                     {/* Edit Dialog */}
                     <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
@@ -621,6 +1106,15 @@ export default function MedicalRoomsPage() {
                             </div>
                         </DialogContent>
                     </Dialog>
+
+                    {/* New Detailed Room Times View Dialog */}
+                    <ViewRoomTimesDialog
+                        open={isViewTimesDialogOpen}
+                        onOpenChange={setIsViewTimesDialogOpen}
+                        room={selectedRoom}
+                        timeSlots={timeSlots}
+                        loading={timeSlotsLoading}
+                    />
                 </main>
             </div>
         </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback } from "react"
-import Sidebar from "@/components/layout/Sidebar/Sidebar"
+import { Sidebar } from "@/components/layout/Sidebar/Sidebar"
 import { Header } from "@/components/layout/Header/Header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -31,9 +31,10 @@ import { SelectPositions } from "./SelectPositions"
 import { useGetDepartments } from "@/hooks/use-departments"
 import { useGetPositions } from "@/hooks/use-positions"
 import { getDepartmentName, getEducationDisplayName, getPositionName } from "@/utils/utils"
+import { useNavigate } from "@tanstack/react-router"
 
 export default function StaffManagement() {
-    const { account } = useSession()
+    const { account, isLoading, isAuthenticated } = useSession()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [editingStaff, setEditingStaff] = useState<StaffWithDetails | null>(null)
     const [searchTerm, setSearchTerm] = useState("")
@@ -44,6 +45,17 @@ export default function StaffManagement() {
     const [currentPage, setCurrentPage] = useState(1)
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        if (!isLoading) {
+            if (!isAuthenticated) {
+                navigate({ to: "/sign-in" });
+            }
+        }
+    }, [isAuthenticated, isLoading, navigate]);
+
     // Debounce search term
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -306,9 +318,6 @@ export default function StaffManagement() {
                                                         <div className="flex flex-col">
                                                             <span className="font-semibold">
                                                                 {`${staff.firstname} ${staff.lastname}`}
-                                                            </span>
-                                                            <span className="text-sm text-gray-500">
-                                                                ID: {staff.id}
                                                             </span>
                                                         </div>
                                                     </TableCell>

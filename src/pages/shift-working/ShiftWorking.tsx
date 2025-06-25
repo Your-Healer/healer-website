@@ -24,9 +24,10 @@ import { getDepartmentName, getMedicalRoomName, getShiftStatus, getStaffName } f
 import { useGetDepartments } from "@/hooks/use-departments"
 import { useGetStaffs } from "@/hooks/use-staffs"
 import { useGetMedicalRooms } from "@/hooks/use-medical"
+import { useNavigate } from "@tanstack/react-router"
 
 export default function ShiftWorkingManagement() {
-    const { account } = useSession()
+    const { account, isLoading, isAuthenticated } = useSession()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [editingShiftWorking, setEditingShiftWorking] = useState<ShiftWorkingDetails | null>(null)
     const [staffFilter, setStaffFilter] = useState<string>("all")
@@ -41,6 +42,16 @@ export default function ShiftWorkingManagement() {
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     const { deleteShiftWorking, loading: deleteLoading } = useDeleteShiftWorking()
+
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        if (!isLoading) {
+            if (!isAuthenticated) {
+                navigate({ to: "/sign-in" });
+            }
+        }
+    }, [isAuthenticated, isLoading, navigate]);
 
     // Reset filters when department changes
     useEffect(() => {

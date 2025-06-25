@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import Sidebar from "@/components/layout/Sidebar/Sidebar"
+import { Sidebar } from "@/components/layout/Sidebar/Sidebar"
 import { Header } from "@/components/layout/Header/Header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -25,6 +25,7 @@ import { ServiceWithDetails } from "@/models/models"
 import { TableLoading, ButtonLoading } from "@/components/loading"
 import { toast } from "sonner"
 import { Pagination } from "@/components/ui/pagination"
+import { useNavigate } from "@tanstack/react-router"
 
 interface ServiceFormData {
     name: string
@@ -34,7 +35,7 @@ interface ServiceFormData {
 }
 
 export default function MedicalServicesPage() {
-    const { account } = useSession()
+    const { account, isLoading, isAuthenticated } = useSession()
 
     // State management
     const [currentPage, setCurrentPage] = useState(1)
@@ -54,6 +55,16 @@ export default function MedicalServicesPage() {
         durationTime: 30,
         price: 0,
     })
+
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        if (!isLoading) {
+            if (!isAuthenticated) {
+                navigate({ to: "/sign-in" });
+            }
+        }
+    }, [isAuthenticated, isLoading, navigate]);
 
     // Debounce search term
     useEffect(() => {
@@ -179,7 +190,7 @@ export default function MedicalServicesPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <h1 className="text-2xl font-bold text-gray-900">Quản lý Dịch vụ Y tế</h1>
-                                <p className="text-gray-600">Quản lý các dịch vụ khám chữa bệnh và định giá</p>
+                                <p className="text-gray-600">Quản lý các dịch vụ khám chữa bệnh</p>
                             </div>
                             <div className="flex gap-2">
                                 <Button variant="outline" onClick={refetch} disabled={loading}>

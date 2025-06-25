@@ -7,20 +7,11 @@ import {
     LogOut,
     Menu,
     X,
-    ChevronRight,
     User,
     Shield,
     UserCheck
 } from "lucide-react"
 import { adminMenuItems, staffMenuItems } from "@/utils/side-bar-menu"
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { Badge } from "@/components/ui/badge"
-import SidebarItem from "./SidebarItem"
 
 interface SidebarProps {
     userRole?: string
@@ -40,13 +31,13 @@ export function Sidebar({ userRole }: SidebarProps) {
     const getRoleInfo = () => {
         switch (userRole) {
             case "1":
-                return { name: "Quản trị viên", icon: Shield, color: "bg-red-500" }
+                return { name: "Admin", icon: Shield, color: "text-red-600" }
             case "2":
-                return { name: "Nhân viên", icon: UserCheck, color: "bg-blue-500" }
+                return { name: "Staff", icon: UserCheck, color: "text-blue-600" }
             case "3":
-                return { name: "Người dùng", icon: User, color: "bg-green-500" }
+                return { name: "User", icon: User, color: "text-green-600" }
             default:
-                return { name: "Không xác định", icon: User, color: "bg-gray-500" }
+                return { name: "Guest", icon: User, color: "text-gray-600" }
         }
     }
 
@@ -55,126 +46,94 @@ export function Sidebar({ userRole }: SidebarProps) {
 
     return (
         <div className={cn(
-            "bg-white border-r border-gray-200 h-screen flex flex-col transition-all duration-300 ease-in-out shadow-lg",
-            isCollapsed ? "w-20" : "w-72"
+            "bg-white border-r border-gray-200 h-screen flex flex-col transition-all duration-200",
+            isCollapsed ? "w-16" : "w-64"
         )}>
             {/* Header */}
-            <div className="p-6 border-b border-gray-100">
+            <div className="p-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                     {!isCollapsed && (
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                                <span className="text-white font-bold text-lg">H</span>
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                <span className="text-white font-bold text-sm">H</span>
                             </div>
-                            <div>
-                                <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                                    Healer
-                                </h2>
-                                <p className="text-xs text-gray-500 font-medium">Medical System</p>
-                            </div>
+                            <span className="font-bold text-gray-900">Healer</span>
                         </div>
                     )}
-
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setIsCollapsed(!isCollapsed)}
-                                    className="h-9 w-9 rounded-lg hover:bg-gray-100 transition-colors duration-200"
-                                >
-                                    {isCollapsed ?
-                                        <Menu className="h-5 w-5 text-gray-600" /> :
-                                        <X className="h-5 w-5 text-gray-600" />
-                                    }
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent side={isCollapsed ? "right" : "bottom"}>
-                                <p>{isCollapsed ? "Mở rộng menu" : "Thu gọn menu"}</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        className="p-2"
+                    >
+                        {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
+                    </Button>
                 </div>
             </div>
 
             {/* User Info */}
             {!isCollapsed && (
-                <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100">
+                <div className="p-4 border-b border-gray-200 bg-gray-50">
                     <div className="flex items-center gap-3">
-                        <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shadow-md", roleInfo.color)}>
-                            <RoleIcon className="h-5 w-5 text-white" />
+                        <div className={cn("w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center", roleInfo.color)}>
+                            <RoleIcon className="h-4 w-4" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-gray-900 truncate">
-                                {
-                                    account?.role?.id === "2" ?
-                                        `${staff?.firstname} ${staff?.lastname}` :
-                                        `${user?.firstname} ${user?.lastname}` || "Người dùng"}
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                                {account?.role?.id === "2" ?
+                                    `${staff?.firstname} ${staff?.lastname}` :
+                                    `${user?.firstname} ${user?.lastname}` || "User"}
                             </p>
-                            <div className="flex items-center gap-2">
-                                <Badge variant="secondary" className="text-xs">
-                                    {roleInfo.name}
-                                </Badge>
-                            </div>
+                            <p className="text-xs text-gray-500">{roleInfo.name}</p>
                         </div>
                     </div>
                 </div>
             )}
 
             {/* Navigation */}
-            <nav className="flex-1 p-4 overflow-y-auto">
-                <div className="space-y-2">
-                    {!isCollapsed && (
-                        <div className="px-4 mb-6">
-                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                Điều hướng
-                            </p>
-                        </div>
-                    )}
+            <nav className="flex-1 p-4">
+                <div className="space-y-1">
+                    {filteredMenuItems.map((item) => {
+                        const Icon = item.icon
+                        const isActive = location.pathname === item.href ||
+                            (item.href !== '/dashboard' && location.pathname.startsWith(item.href))
 
-                    {filteredMenuItems.map((item) => (
-                        <SidebarItem key={item.href} item={item} isCollapsed={isCollapsed} />
-                    ))}
+                        return (
+                            <Link
+                                key={item.href}
+                                to={item.href}
+                                className={cn(
+                                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                                    isActive
+                                        ? "bg-blue-100 text-blue-600"
+                                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                                    isCollapsed && "justify-center px-2"
+                                )}
+                            >
+                                <Icon className="h-5 w-5 flex-shrink-0" />
+                                {!isCollapsed && (
+                                    <span className="truncate">{item.label}</span>
+                                )}
+                            </Link>
+                        )
+                    })}
                 </div>
             </nav>
 
             {/* Footer */}
-            <div className="p-4 border-t border-gray-100 bg-gray-50/50">
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                onClick={logout}
-                                className={cn(
-                                    "w-full transition-all duration-200 hover:bg-red-50 hover:text-red-600 group rounded-xl",
-                                    isCollapsed ? "justify-center px-0" : "justify-start gap-3"
-                                )}
-                            >
-                                <LogOut className="h-5 w-5 group-hover:animate-pulse" />
-                                {!isCollapsed && <span className="font-medium">Đăng xuất</span>}
-                            </Button>
-                        </TooltipTrigger>
-                        {isCollapsed && (
-                            <TooltipContent side="right">
-                                <p>Đăng xuất</p>
-                            </TooltipContent>
-                        )}
-                    </Tooltip>
-                </TooltipProvider>
-
-                {!isCollapsed && (
-                    <div className="mt-3 pt-3 border-t border-gray-200">
-                        <p className="text-xs text-gray-400 text-center">
-                            Version 1.0.0
-                        </p>
-                    </div>
-                )}
+            <div className="p-4 border-t border-gray-200">
+                <Button
+                    variant="ghost"
+                    onClick={logout}
+                    className={cn(
+                        "w-full transition-colors hover:bg-red-50 hover:text-red-600",
+                        isCollapsed ? "px-2" : "justify-start gap-3"
+                    )}
+                >
+                    <LogOut className="h-5 w-5 flex-shrink-0" />
+                    {!isCollapsed && <span>Logout</span>}
+                </Button>
             </div>
         </div>
     )
 }
-
-// Add default export for compatibility
-export default Sidebar

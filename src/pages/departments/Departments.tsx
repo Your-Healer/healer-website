@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import Sidebar from "@/components/layout/Sidebar/Sidebar"
+import { Sidebar } from "@/components/layout/Sidebar/Sidebar"
 import { Header } from "@/components/layout/Header/Header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -27,6 +27,7 @@ import { TableLoading, ButtonLoading } from "@/components/loading"
 import { toast } from "sonner"
 import { Pagination } from "@/components/ui/pagination"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useNavigate } from "@tanstack/react-router"
 
 interface DepartmentFormData {
     name: string
@@ -36,7 +37,7 @@ interface DepartmentFormData {
 }
 
 export default function DepartmentManagement() {
-    const { account } = useSession()
+    const { account, isLoading, isAuthenticated } = useSession()
 
     // State management
     const [currentPage, setCurrentPage] = useState(1)
@@ -51,6 +52,8 @@ export default function DepartmentManagement() {
     const [editingDepartment, setEditingDepartment] = useState<DepartmentWithDetails | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
+    const navigate = useNavigate()
+
     // Form data
     const [formData, setFormData] = useState<DepartmentFormData>({
         name: "",
@@ -58,6 +61,14 @@ export default function DepartmentManagement() {
         locationId: "",
         floor: 1,
     })
+
+    useEffect(() => {
+        if (!isLoading) {
+            if (!isAuthenticated) {
+                navigate({ to: "/sign-in" });
+            }
+        }
+    }, [isAuthenticated, isLoading, navigate]);
 
     // Debounce search term
     useEffect(() => {

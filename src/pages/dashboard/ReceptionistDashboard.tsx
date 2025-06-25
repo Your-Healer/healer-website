@@ -1,4 +1,4 @@
-import Sidebar from "@/components/layout/Sidebar/Sidebar"
+import { Sidebar } from "@/components/layout/Sidebar/Sidebar"
 import { Header } from "@/components/layout/Header/Header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -7,6 +7,7 @@ import { Calendar, Clock, Users, Activity, Phone, UserPlus, CheckCircle, AlertCi
 import { Navigate, useNavigate } from "@tanstack/react-router"
 import { useSession } from "@/contexts/SessionProvider"
 import { DashboardLoading } from "@/components/loading"
+import { useEffect } from "react"
 
 export default function ReceptionistDashboard() {
     const { isAuthenticated, user, account, isLoading } = useSession();
@@ -19,6 +20,14 @@ export default function ReceptionistDashboard() {
             console.error('Navigation error:', error)
         }
     }
+
+    useEffect(() => {
+        if (!isLoading) {
+            if (!isAuthenticated) {
+                navigate({ to: "/sign-in" });
+            }
+        }
+    }, [isAuthenticated, isLoading, navigate]);
 
     // Show loading while checking authentication
     if (isLoading) {
