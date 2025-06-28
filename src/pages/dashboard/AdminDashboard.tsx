@@ -49,7 +49,7 @@ export default function AdminDashboard() {
             value: stats.totalPatients.toLocaleString(),
             icon: UserCheck,
             change: "+12%",
-            href: "/admin/patients",
+            href: "/patients",
             color: "text-blue-600",
             bgColor: "bg-blue-50"
         },
@@ -58,7 +58,7 @@ export default function AdminDashboard() {
             value: stats.totalStaff.toString(),
             icon: Users,
             change: "+3%",
-            href: "/admin/staff",
+            href: "/staff",
             color: "text-green-600",
             bgColor: "bg-green-50"
         },
@@ -67,7 +67,7 @@ export default function AdminDashboard() {
             value: stats.todayAppointments.toString(),
             icon: Calendar,
             change: "+8%",
-            href: "/admin/appointments",
+            href: "/appointments",
             color: "text-purple-600",
             bgColor: "bg-purple-50"
         },
@@ -76,7 +76,7 @@ export default function AdminDashboard() {
             value: stats.totalDepartments.toString(),
             icon: Building2,
             change: "0%",
-            href: "/admin/departments",
+            href: "/departments",
             color: "text-orange-600",
             bgColor: "bg-orange-50"
         },
@@ -85,18 +85,9 @@ export default function AdminDashboard() {
             value: stats.totalMedicalRooms.toString(),
             icon: Stethoscope,
             change: "+5%",
-            href: "/admin/medical-rooms",
+            href: "/medical-rooms",
             color: "text-indigo-600",
             bgColor: "bg-indigo-50"
-        },
-        {
-            title: "Doanh Thu Tháng",
-            value: `$${stats.monthlyRevenue.toLocaleString()}`,
-            icon: DollarSign,
-            change: "+15%",
-            href: "/admin/analytics",
-            color: "text-emerald-600",
-            bgColor: "bg-emerald-50"
         },
     ];
 
@@ -107,20 +98,6 @@ export default function AdminDashboard() {
             subtitle: "tổng số lịch hẹn",
             icon: UserCheck,
             color: "text-green-600"
-        },
-        {
-            title: "Thời Gian Chờ Trung Bình",
-            value: `${stats.averageWaitTime} phút`,
-            subtitle: "thời gian chờ",
-            icon: Timer,
-            color: "text-blue-600"
-        },
-        {
-            title: "Tỷ Lệ Hài Lòng",
-            value: `${stats.patientSatisfactionRate}%`,
-            subtitle: "đánh giá bệnh nhân",
-            icon: Star,
-            color: "text-yellow-600"
         },
         {
             title: "Lịch Hẹn Đang Chờ",
@@ -270,7 +247,7 @@ export default function AdminDashboard() {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => handleCardClick('/admin/appointments')}
+                                    onClick={() => handleCardClick('/appointments')}
                                 >
                                     Xem tất cả
                                 </Button>
@@ -321,7 +298,7 @@ export default function AdminDashboard() {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => handleCardClick('/admin/activity-logs')}
+                                    onClick={() => handleCardClick('/activity-logs')}
                                 >
                                     Xem chi tiết
                                 </Button>

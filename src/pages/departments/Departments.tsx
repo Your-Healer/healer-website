@@ -17,7 +17,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Edit, Trash2, Search, Building, MapPin, Users, RefreshCw, X } from "lucide-react"
+import { Plus, Edit, Trash2, Search, Building, MapPin, Users, RefreshCw, X, Eye } from "lucide-react"
 import { DepartmentWithDetails } from "@/models/models"
 import { useSession } from "@/contexts/SessionProvider"
 import { useGetDepartments, createDepartment, updateDepartment, deleteDepartment } from "@/hooks/use-departments"
@@ -28,6 +28,7 @@ import { toast } from "sonner"
 import { Pagination } from "@/components/ui/pagination"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useNavigate } from "@tanstack/react-router"
+import { parseEducationLevelToVietnameseString } from "@/utils/utils"
 
 interface DepartmentFormData {
     name: string
@@ -48,7 +49,9 @@ export default function DepartmentManagement() {
     const [floorFilter, setFloorFilter] = useState("all")
 
     // Dialog states
+    const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [viewingDepartment, setViewingDepartment] = useState<DepartmentWithDetails | null>(null)
     const [editingDepartment, setEditingDepartment] = useState<DepartmentWithDetails | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -127,6 +130,11 @@ export default function DepartmentManagement() {
             floor: department.floor,
         })
         setIsDialogOpen(true)
+    }
+
+    const handleViewDepartment = (department: DepartmentWithDetails) => {
+        setViewingDepartment(department);
+        setIsViewDialogOpen(true);
     }
 
     const handleSubmitDepartment = async () => {
@@ -349,7 +357,6 @@ export default function DepartmentManagement() {
                                                 <TableHead>Địa điểm</TableHead>
                                                 <TableHead>Tầng</TableHead>
                                                 <TableHead>Số nhân viên</TableHead>
-                                                <TableHead>Trạng thái</TableHead>
                                                 <TableHead>Thao tác</TableHead>
                                             </TableRow>
                                         </TableHeader>
@@ -392,12 +399,16 @@ export default function DepartmentManagement() {
                                                             </div>
                                                         </TableCell>
                                                         <TableCell>
-                                                            <Badge className="bg-green-100 text-green-800">
-                                                                Hoạt động
-                                                            </Badge>
-                                                        </TableCell>
-                                                        <TableCell>
                                                             <div className="flex gap-2">
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={() => handleViewDepartment(department)}
+                                                                    disabled={isSubmitting}
+                                                                    title="Xem chi tiết bệnh nhân"
+                                                                >
+                                                                    <Eye className="h-4 w-4" />
+                                                                </Button>
                                                                 <Button
                                                                     size="sm"
                                                                     variant="outline"
@@ -526,6 +537,238 @@ export default function DepartmentManagement() {
                                     ) : (
                                         editingDepartment ? "Cập nhật" : "Tạo Khoa"
                                     )}
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+
+                    {/* View Department Dialog */}
+                    <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+                        <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle>Chi Tiết Khoa Khám Bệnh</DialogTitle>
+                                <DialogDescription>Thông tin chi tiết về khoa khám bệnh</DialogDescription>
+                            </DialogHeader>
+                            {viewingDepartment && (
+                                <div className="grid gap-6 py-4">
+                                    {/* Basic Information */}
+                                    <div className="space-y-3">
+                                        <h4 className="font-medium text-gray-900 border-b pb-1">Thông Tin Cơ Bản</h4>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <Label className="font-semibold text-sm">Tên khoa</Label>
+                                                <p className="text-sm flex items-center gap-2">
+                                                    <Building className="h-4 w-4 text-gray-400" />
+                                                    {viewingDepartment.name}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <Label className="font-semibold text-sm">Ký hiệu</Label>
+                                                <p className="text-sm">
+                                                    <Badge variant="outline" className="font-mono">
+                                                        {viewingDepartment.symbol}
+                                                    </Badge>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <Label className="font-semibold text-sm">Tầng</Label>
+                                                <p className="text-sm">
+                                                    <Badge variant="secondary">Tầng {viewingDepartment.floor}</Badge>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Location Information */}
+                                    <div className="space-y-3">
+                                        <h4 className="font-medium text-gray-900 border-b pb-1">Thông Tin Địa Điểm</h4>
+                                        {viewingDepartment.location ? (
+                                            <div className="space-y-3">
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <Label className="font-semibold text-sm">Tên địa điểm</Label>
+                                                        <p className="text-sm flex items-center gap-1">
+                                                            <MapPin className="h-3 w-3 text-gray-400" />
+                                                            {viewingDepartment.location.name}
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <Label className="font-semibold text-sm">Thành phố</Label>
+                                                        <p className="text-sm">{viewingDepartment.location.city}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <Label className="font-semibold text-sm">Quốc gia</Label>
+                                                        <p className="text-sm">{viewingDepartment.location.country}</p>
+                                                    </div>
+                                                    <div>
+                                                        <Label className="font-semibold text-sm">Đường</Label>
+                                                        <p className="text-sm">{viewingDepartment.location.street}</p>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <Label className="font-semibold text-sm">Chi tiết địa chỉ</Label>
+                                                    <p className="text-sm">{viewingDepartment.location.detail || "Không có thông tin chi tiết"}</p>
+                                                </div>
+                                                {viewingDepartment.location.lat && viewingDepartment.location.lng && (
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div>
+                                                            <Label className="font-semibold text-sm">Vĩ độ</Label>
+                                                            <p className="text-sm font-mono">{viewingDepartment.location.lat}</p>
+                                                        </div>
+                                                        <div>
+                                                            <Label className="font-semibold text-sm">Kinh độ</Label>
+                                                            <p className="text-sm font-mono">{viewingDepartment.location.lng}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <p className="text-sm text-gray-500">Chưa có thông tin địa điểm</p>
+                                        )}
+                                    </div>
+
+                                    {/* Staff Information */}
+                                    <div className="space-y-3">
+                                        <h4 className="font-medium text-gray-900 border-b pb-1 flex items-center gap-2">
+                                            <Users className="h-4 w-4" />
+                                            Danh Sách Nhân Viên
+                                            {viewingDepartment.staffAssignments && (
+                                                <Badge variant="secondary" className="ml-auto">
+                                                    {viewingDepartment.staffAssignments.length} nhân viên
+                                                </Badge>
+                                            )}
+                                        </h4>
+                                        <div>
+                                            {viewingDepartment.staffAssignments && viewingDepartment.staffAssignments.length > 0 ? (
+                                                <div className="space-y-3 max-h-60 overflow-y-auto">
+                                                    {viewingDepartment.staffAssignments.map((assignment, index) => (
+                                                        <div key={`${assignment.staffId}-${index}`} className="p-4 bg-gray-50 rounded-lg border">
+                                                            <div className="flex items-start justify-between">
+                                                                <div className="flex-1 space-y-2">
+                                                                    {/* Staff Basic Info */}
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                                                            <Users className="h-5 w-5 text-blue-600" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h5 className="font-semibold text-gray-900">
+                                                                                {assignment.staff ?
+                                                                                    `${assignment.staff.firstname} ${assignment.staff.lastname}`
+                                                                                    : 'Không có thông tin tên'
+                                                                                }
+                                                                            </h5>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Staff Details */}
+                                                                    {assignment.staff && (
+                                                                        <div className="ml-13 space-y-2">
+                                                                            {/* Account Information */}
+                                                                            {assignment.staff.account && (
+                                                                                <div className="grid grid-cols-2 gap-4">
+                                                                                    <div>
+                                                                                        <Label className="font-semibold text-xs text-gray-600">Email</Label>
+                                                                                        <p className="text-sm">{assignment.staff.account.email || "Chưa có"}</p>
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <Label className="font-semibold text-xs text-gray-600">Số điện thoại</Label>
+                                                                                        <p className="text-sm">{assignment.staff.account.phoneNumber || "Chưa có"}</p>
+                                                                                    </div>
+                                                                                </div>
+                                                                            )}
+
+                                                                            {/* Education Level */}
+                                                                            {assignment.staff.educationLevel && (
+                                                                                <div>
+                                                                                    <Label className="font-semibold text-xs text-gray-600">Trình độ học vấn</Label>
+                                                                                    <Badge variant="outline" className="ml-2 text-xs">
+                                                                                        {assignment.staff.educationLevel ? parseEducationLevelToVietnameseString(assignment.staff.educationLevel) : "Không xác định"}
+                                                                                    </Badge>
+                                                                                </div>
+                                                                            )}
+
+                                                                            {/* Positions */}
+                                                                            {assignment.staff.positions && assignment.staff.positions.length > 0 && (
+                                                                                <div>
+                                                                                    <Label className="font-semibold text-xs text-gray-600">Chức vụ</Label>
+                                                                                    <div className="flex flex-wrap gap-1 mt-1">
+                                                                                        {assignment.staff.positions.map((pos, posIndex) => (
+                                                                                            <Badge key={posIndex} variant="secondary" className="text-xs">
+                                                                                                {pos.position?.name || `Position ID: ${pos.positionId}`}
+                                                                                            </Badge>
+                                                                                        ))}
+                                                                                    </div>
+                                                                                </div>
+                                                                            )}
+
+                                                                            {/* Introduction */}
+                                                                            {assignment.staff.introduction && (
+                                                                                <div>
+                                                                                    <Label className="font-semibold text-xs text-gray-600">Giới thiệu</Label>
+                                                                                    <p className="text-sm text-gray-700 mt-1 italic">
+                                                                                        "{assignment.staff.introduction}"
+                                                                                    </p>
+                                                                                </div>
+                                                                            )}
+
+                                                                            {/* Work Schedule Info */}
+                                                                            {assignment.staff.shifts && assignment.staff.shifts.length > 0 && (
+                                                                                <div>
+                                                                                    <Label className="font-semibold text-xs text-gray-600">Ca làm việc</Label>
+                                                                                    <Badge variant="outline" className="ml-2 text-xs">
+                                                                                        {assignment.staff.shifts.length} ca
+                                                                                    </Badge>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+
+                                                                {/* Role Badge */}
+                                                                <div className="flex flex-col items-end gap-2">
+                                                                    {assignment.staff?.account?.role && (
+                                                                        <Badge variant="default" className="text-xs">
+                                                                            {assignment.staff.account.role.name}
+                                                                        </Badge>
+                                                                    )}
+                                                                    {assignment.staff?.account?.emailIsVerified && (
+                                                                        <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
+                                                                            ✓ Đã xác thực
+                                                                        </Badge>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+                                                    <Users className="h-12 w-12 mb-3 text-gray-300" />
+                                                    <p className="text-sm font-medium">Chưa có nhân viên nào được phân công</p>
+                                                    <p className="text-xs">Khoa này hiện tại chưa có nhân viên làm việc</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            <DialogFooter>
+                                <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+                                    Đóng
+                                </Button>
+                                <Button
+                                    onClick={() => {
+                                        setIsViewDialogOpen(false)
+                                        if (viewingDepartment) {
+                                            handleEditDepartment(viewingDepartment)
+                                        }
+                                    }}
+                                >
+                                    Chỉnh sửa
                                 </Button>
                             </DialogFooter>
                         </DialogContent>

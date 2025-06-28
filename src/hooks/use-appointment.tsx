@@ -3,6 +3,8 @@ import { AppointmentWithDetails } from "@/models/models";
 import { AppointmentFilter, CreateAppointmentRequest, GetAppointmentsRequest, GetPatientAppointmentHistoryRequest, PaginationResponse } from "@/utils/types";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { APPOINTMENTSTATUS } from "@/utils/enum";
+import { AddDiagnosisSuggestionRequest } from '../utils/types';
 
 export const useGetAppointments = (params: GetAppointmentsRequest) => {
     const [appointments, setAppointments] = useState<AppointmentWithDetails[]>([]);
@@ -112,18 +114,6 @@ export const useGetPatientAppointmentHistory = (patientId: string, params: GetPa
     return { appointments, loading, pagination, refetch: fetchAppointments };
 }
 
-export const createNewAppointment = async (body: CreateAppointmentRequest) => {
-    return await api.post('/appointments', body);
-}
-
-export const completeAppointment = async (appointmentId: string) => {
-    return await api.post(`/appointments/${appointmentId}/complete`);
-}
-
-export const cancelAppointment = async (appointmentId: string) => {
-    return await api.post(`/appointments/${appointmentId}/cancel`);
-}
-
 export const useGetAppointmentById = (appointmentId: string) => {
     const [appointment, setAppointment] = useState<AppointmentWithDetails | null>(null);
     const [loading, setLoading] = useState(true);
@@ -153,4 +143,24 @@ export const useGetAppointmentById = (appointmentId: string) => {
         }
     }, [appointmentId]);
     return { appointment, loading, error, refetch: fetchAppointment };
+}
+
+export const createNewAppointment = async (body: CreateAppointmentRequest) => {
+    return await api.post('/appointments', body);
+}
+
+export const completeAppointment = async (appointmentId: string) => {
+    return await api.patch(`/appointments/${appointmentId}/complete`);
+}
+
+export const cancelAppointment = async (appointmentId: string) => {
+    return await api.patch(`/appointments/${appointmentId}/cancel`);
+}
+
+export const updateAppointmentStatus = async (appointmentId: string, status: APPOINTMENTSTATUS) => {
+    return await api.patch(`/appointments/${appointmentId}/status`, { status });
+}
+
+export const addDiagnosisSuggestion = async (appointmentId: string, data: AddDiagnosisSuggestionRequest) => {
+    return await api.post(`/appointments/${appointmentId}/diagnosis`, data);
 }

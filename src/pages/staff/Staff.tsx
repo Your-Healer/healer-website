@@ -30,8 +30,9 @@ import { SelectDepartments } from "@/components/select/SelectDepartments"
 import { SelectPositions } from "./SelectPositions"
 import { useGetDepartments } from "@/hooks/use-departments"
 import { useGetPositions } from "@/hooks/use-positions"
-import { getDepartmentName, getEducationDisplayName, getPositionName } from "@/utils/utils"
+import { getDepartmentName, getPositionName, parseEducationLevelToVietnameseString } from "@/utils/utils"
 import { useNavigate } from "@tanstack/react-router"
+import { EDUCATIONLEVEL } from "@/utils/enum"
 
 export default function StaffManagement() {
     const { account, isLoading, isAuthenticated } = useSession()
@@ -41,7 +42,7 @@ export default function StaffManagement() {
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("")
     const [departmentFilter, setDepartmentFilter] = useState<string>("all")
     const [positionFilter, setPositionFilter] = useState<string>("all")
-    const [educationFilter, setEducationFilter] = useState<string>("all")
+    const [educationFilter, setEducationFilter] = useState<"all" | EDUCATIONLEVEL>("all")
     const [currentPage, setCurrentPage] = useState(1)
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -219,7 +220,11 @@ export default function StaffManagement() {
                                         allLabel="Tất cả chức vụ"
                                     />
 
-                                    <Select value={educationFilter} onValueChange={setEducationFilter}>
+                                    <Select value={educationFilter} onValueChange={
+                                        (value: string) => {
+                                            setEducationFilter(value as "all" | EDUCATIONLEVEL)
+                                        }
+                                    }>
                                         <SelectTrigger className="w-[180px]">
                                             <SelectValue placeholder="Lọc theo học vấn" />
                                         </SelectTrigger>
@@ -271,7 +276,7 @@ export default function StaffManagement() {
                                         )}
                                         {educationFilter !== "all" && (
                                             <Badge variant="secondary" className="gap-1">
-                                                Học vấn: {getEducationDisplayName(educationFilter)}
+                                                Học vấn: {parseEducationLevelToVietnameseString(educationFilter)}
                                                 <button
                                                     onClick={() => setEducationFilter("all")}
                                                     className="ml-1 hover:bg-gray-300 rounded-full p-0.5"
@@ -390,7 +395,7 @@ export default function StaffManagement() {
                                                         {staff.educationLevel ? (
                                                             <Badge variant="secondary" className="gap-1">
                                                                 <GraduationCap className="h-3 w-3" />
-                                                                {getEducationDisplayName(staff.educationLevel)}
+                                                                {parseEducationLevelToVietnameseString(staff.educationLevel)}
                                                             </Badge>
                                                         ) : (
                                                             <span className="text-gray-400">Chưa có</span>
@@ -553,7 +558,7 @@ export default function StaffManagement() {
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="grid gap-2">
                                             <Label htmlFor="education">Trình độ học vấn</Label>
-                                            <Select defaultValue={editingStaff?.educationLevel}>
+                                            <Select defaultValue={editingStaff?.educationLevel ? parseEducationLevelToVietnameseString(editingStaff?.educationLevel) : "Không xác định"}>
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Chọn trình độ học vấn" />
                                                 </SelectTrigger>

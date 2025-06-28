@@ -1,4 +1,9 @@
-import { APPOINTMENTSTATUS, EDUCATIONLEVEL } from "@/utils/enum";
+import {
+	APPOINTMENTSTATUS,
+	BLOCKCHAIN_OPERATION_TYPE,
+	BLOCKCHAIN_RECORD_TYPE,
+	EDUCATIONLEVEL,
+} from "@/utils/enum";
 
 export interface Attachment {
 	id: string;
@@ -229,6 +234,7 @@ export interface PositionStaffWithDetail extends PositionStaff {
 }
 
 export interface StaffOnDepartmentWithDetail extends StaffOnDepartment {
+	staff: StaffWithDetails;
 	department: DepartmentWithDetails;
 }
 
@@ -247,7 +253,7 @@ export interface PatientWithDetails extends Patient {
 
 export interface DepartmentWithDetails extends Department {
 	location?: LocationWithDetails;
-	staffAssignments?: StaffOnDepartment[];
+	staffAssignments?: StaffOnDepartmentWithDetail[];
 }
 
 export interface LocationWithDetails extends Location {
@@ -292,6 +298,7 @@ export interface AppointmentStatusLogWithDetails extends AppointmentStatusLog {
 }
 
 export interface BlockchainPatientWithDetails {
+	patientId: string;
 	patientName: string;
 	dateOfBirth: string; // timestamp
 	gender: string;
@@ -304,4 +311,85 @@ export interface BlockchainPatientWithDetails {
 	lastModifiedAt: string; // block number
 	lastModifiedBy: string; // modifier's wallet address
 	lastModifiedByAccount: AccountWithDetails;
+}
+
+export interface BlockchainClinicalTestWithDetails {
+	testId: string;
+	patientId: string;
+	doctorId: string;
+	doctor: AccountWithDetails;
+	testType: string;
+	testDate: string; // timestamp
+	result: string;
+	notes: string;
+	createdAt: string;
+	createBy: string;
+	createByAccount: AccountWithDetails;
+	lastModifiedAt: string; // block number
+	lastModifiedBy: string; // modifier's wallet address
+	lastModifiedByAccount: AccountWithDetails;
+}
+
+export interface BlockchainPatientClinicalTestWithDetails
+	extends BlockchainPatientWithDetails {
+	tests: BlockchainClinicalTestWithDetails[];
+}
+
+export interface BlockchainDiseaseProgressionWithDetails {
+	progressionId: string;
+	patientId: string;
+	doctorId: string;
+	doctor: AccountWithDetails;
+	visitDate: string;
+	symptoms: string;
+	diagnosis: string;
+	treatment: string;
+	prescription: string;
+	nextAppointment: string; // timestamp
+	createdAt: string;
+	createBy: string;
+	createByAccount: AccountWithDetails;
+	lastModifiedAt: string; // block number
+	lastModifiedBy: string; // modifier's wallet address
+	lastModifiedByAccount: AccountWithDetails;
+}
+
+export interface BlockchainPatientDiseaseProgressionWithDetails
+	extends BlockchainPatientWithDetails {
+	progressions: BlockchainDiseaseProgressionWithDetails[];
+}
+
+export interface BlockchainMedicalRecordWithDetails {
+	recordId: string;
+	patientId: string;
+	doctorId: string;
+	doctorAccount: AccountWithDetails;
+	recordHash: string;
+	dataPointer: string | null;
+	diagnosis: string;
+	treatment: string;
+	createdAt: string;
+	createBy: string;
+	createByAccount: AccountWithDetails;
+	lastModifiedAt: string; // block number
+	lastModifiedBy: string; // modifier's wallet address
+	lastModifiedByAccount: AccountWithDetails;
+}
+
+export interface BlockchainPatientMedicalRecordWithDetails
+	extends BlockchainPatientWithDetails {
+	records: BlockchainMedicalRecordWithDetails[];
+}
+
+export interface BlockchainChangeHistoryWithDetails {
+	changeId: string;
+	recordType: BLOCKCHAIN_RECORD_TYPE;
+	recordId: string;
+	fieldName: string;
+	oldValue: string;
+	newValue: string;
+	changedBy: string;
+	changeByAccount: AccountWithDetails;
+	changedAt: string;
+	operation: BLOCKCHAIN_OPERATION_TYPE;
 }

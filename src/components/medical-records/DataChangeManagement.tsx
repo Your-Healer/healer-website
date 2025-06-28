@@ -238,7 +238,10 @@ export default function DataChangeManagement() {
                     <TableBody>
                         {filteredChanges.map((change) => (
                             <TableRow key={change.id}>
-
+                                <TableCell>
+                                    <div className="font-medium">{change.patientName}</div>
+                                    <div className="text-sm text-gray-500 font-mono">{change.recordId}</div>
+                                </TableCell>
                                 <TableCell>
                                     <Badge variant={getChangeTypeVariant(change.changeType)}>
                                         {getChangeTypeDisplayName(change.changeType)}

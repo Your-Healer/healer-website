@@ -36,6 +36,7 @@ export default function PatientManagement() {
     const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
     const [editingPatient, setEditingPatient] = useState<PatientWithDetails | null>(null)
     const [viewingPatient, setViewingPatient] = useState<PatientWithDetails | null>(null)
+
     const [searchTerm, setSearchTerm] = useState("")
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("")
     const [departmentFilter, setDepartmentFilter] = useState<string>("all")
@@ -73,8 +74,6 @@ export default function PatientManagement() {
         limit: itemsPerPage,
         searchTerm: debouncedSearchTerm || undefined,
     })
-
-    console.log(pagination)
 
     const handleAddPatient = () => {
         setEditingPatient(null)

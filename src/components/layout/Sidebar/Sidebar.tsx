@@ -12,6 +12,7 @@ import {
     UserCheck
 } from "lucide-react"
 import { adminMenuItems, staffMenuItems } from "@/utils/side-bar-menu"
+import { useGetMyAccount } from "@/hooks/use-accounts"
 
 interface SidebarProps {
     userRole?: string
@@ -24,6 +25,8 @@ export function Sidebar({ userRole }: SidebarProps) {
 
     const menuItems = userRole == "1" ? adminMenuItems : staffMenuItems
 
+    const { account: myAccount, loading: myAccountLoading } = useGetMyAccount(account?.id || "")
+
     const filteredMenuItems = menuItems.filter((item) => {
         return checkPosition(item.positions)
     })
@@ -33,9 +36,9 @@ export function Sidebar({ userRole }: SidebarProps) {
             case "1":
                 return { name: "Admin", icon: Shield, color: "text-red-600" }
             case "2":
-                return { name: "Staff", icon: UserCheck, color: "text-blue-600" }
+                return { name: "Nhân viên", icon: UserCheck, color: "text-blue-600" }
             case "3":
-                return { name: "User", icon: User, color: "text-green-600" }
+                return { name: "Người dùng bình thường", icon: User, color: "text-green-600" }
             default:
                 return { name: "Guest", icon: User, color: "text-gray-600" }
         }
@@ -84,7 +87,13 @@ export function Sidebar({ userRole }: SidebarProps) {
                                     `${staff?.firstname} ${staff?.lastname}` :
                                     `${user?.firstname} ${user?.lastname}` || "User"}
                             </p>
-                            <p className="text-xs text-gray-500">{roleInfo.name}</p>
+                            <p className="text-xs text-gray-500">
+                                {roleInfo.name}
+                                {myAccount?.roleId === "2" && myAccount?.staff?.positions && myAccount.staff.positions.length > 0 &&
+                                    ` - ${myAccount.staff.positions.map(pos => pos.name).join(', ')}`
+                                }
+                            </p>
+
                         </div>
                     </div>
                 </div>

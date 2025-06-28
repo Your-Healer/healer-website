@@ -1,4 +1,4 @@
-import { APPOINTMENTSTATUS } from "./enum";
+import { APPOINTMENTSTATUS, EDUCATIONLEVEL } from "./enum";
 import {
 	DepartmentWithDetails,
 	MedicalRoomWithDetails,
@@ -57,23 +57,6 @@ export const getPositionName = (positions: Position[], positionId: string) => {
 	}
 };
 
-export const getEducationDisplayName = (level: string) => {
-	switch (level) {
-		case "DIPLOMA":
-			return "Cao đẳng";
-		case "ASSOCIATE":
-			return "Liên thông";
-		case "BACHELOR":
-			return "Cử nhân";
-		case "MASTER":
-			return "Thạc sĩ";
-		case "PROFESSIONAL":
-			return "Chuyên nghiệp";
-		default:
-			return "Không xác định";
-	}
-};
-
 export const getShiftStatus = (shiftWorking: ShiftWorkingDetails) => {
 	const now = new Date();
 	const fromTime = new Date(shiftWorking.fromTime);
@@ -108,4 +91,21 @@ export function getMedicalRoomName(
 
 	const room = rooms?.find((r) => r.id === roomId);
 	return room ? room.name : "Không xác định";
+}
+
+export function parseEducationLevelToVietnameseString(level: EDUCATIONLEVEL) {
+	switch (level) {
+		case EDUCATIONLEVEL.DIPLOMA:
+			return "Cao đẳng";
+		case EDUCATIONLEVEL.ASSOCIATE:
+			return "Liên thông";
+		case EDUCATIONLEVEL.BACHELOR:
+			return "Cử nhân";
+		case EDUCATIONLEVEL.MASTER:
+			return "Thạc sĩ";
+		case EDUCATIONLEVEL.PROFESSIONAL:
+			return "Chuyên nghiệp";
+		default:
+			return "Không xác định";
+	}
 }

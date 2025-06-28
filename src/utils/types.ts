@@ -1,19 +1,4 @@
-import {
-	Account,
-	Appointment,
-	BookingTime,
-	Department,
-	LoggedInAccount,
-	LoggedInStaff,
-	LoggedInUser,
-	MedicalRoom,
-	MedicalRoomTime,
-	Patient,
-	Service,
-	User,
-	UserWithDetails,
-} from "@/models/models";
-import { IndentDecrease } from "lucide-react";
+import { LoggedInAccount, LoggedInStaff, LoggedInUser } from "@/models/models";
 import { APPOINTMENTSTATUS, EDUCATIONLEVEL } from "./enum";
 
 export interface LoginUsernameRequest {
@@ -112,6 +97,13 @@ export interface CreateAppointmentRequest {
 
 export interface UpdateStatusAppointmentRequest {
 	status: APPOINTMENTSTATUS;
+}
+
+export interface AddDiagnosisSuggestionRequest {
+	suggestedByAI?: string;
+	disease: string;
+	confidence: number;
+	description?: string;
 }
 
 export interface GetAllStaffs extends Pagination {
@@ -259,4 +251,98 @@ export interface RecentActivity {
 	user: string;
 	time: string;
 	type: "appointment" | "patient" | "staff" | "system";
+}
+
+export interface BlockchainCreatePatientRequest {
+	accountId: string;
+	patientName: string;
+	dateOfBirth: string;
+	gender: string;
+	address?: string;
+	phoneNumber?: string;
+	emergencyContact?: string;
+}
+
+export interface BlockchainUpdatePatientRequest {
+	patientId?: number;
+	patientName?: string;
+	dateOfBirth?: string;
+	gender?: string;
+	address?: string;
+	phoneNumber?: string;
+	emergencyContact?: string;
+}
+
+export interface BlockchainDeletePatientRequest {
+	patientId: number;
+}
+
+export interface BlockchainCreateClinicalTestRequest {
+	patientId: number;
+	testType: string;
+	testDate: string;
+	result: string;
+	notes: string;
+}
+
+export interface BlockchainUpdateClinicalTestRequest {
+	testId: number;
+	testType?: string;
+	testDate?: string;
+	result?: string;
+	notes?: string;
+}
+
+export interface BlockchainDeleteClinicalTestRequest {
+	testId: number;
+}
+
+export interface BlockchainCreateDiseaseProgressionRequest {
+	patientId: number;
+	visitDate: string;
+	symptoms: string;
+	diagnosis: string;
+	treatment: string;
+	prescription: string;
+	nextAppointment: string;
+}
+
+export interface BlockchainUpdateDiseaseProgressionRequest {
+	progressionId: number;
+	visitDate?: string; // Timestamp in ISO format
+	symptoms?: string;
+	diagnosis?: string;
+	treatment?: string;
+	prescription?: string;
+	nextAppointment?: string; // Timestamp in ISO format
+}
+
+export interface BlockchainDeleteDiseaseProgressionRequest {
+	progressionId: number;
+}
+
+export interface BlockchainCreateMedicalRecordRequest {
+	patientId: number;
+	diagnosis: string;
+	treatment: string;
+	dataPointer?: number;
+}
+
+export interface BlockchainGetAllChangesResponse {
+	changeId: string;
+	recordType: string;
+	recordId: string;
+	fieldName: string;
+	oldValue: string | null;
+	newValue: string;
+	changedBy: string;
+	changedAt: string;
+	operation: string;
+}
+
+export interface BlockchainResponse<T> {
+	status: "success" | "error";
+	data?: T;
+	message?: string;
+	timestamp: string;
 }

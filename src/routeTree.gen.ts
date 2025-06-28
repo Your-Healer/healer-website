@@ -27,6 +27,8 @@ import { Route as AppointmentsIndexImport } from './routes/appointments/index'
 import { Route as AnalyticsIndexImport } from './routes/analytics/index'
 import { Route as AccountsIndexImport } from './routes/accounts/index'
 import { Route as StaffsShiftsImport } from './routes/staffs/shifts'
+import { Route as AppointmentsAppointmentIdImport } from './routes/appointments/$appointmentId'
+import { Route as MedicalRecordsPatientsPatientIdImport } from './routes/medical-records/patients/$patientId'
 
 // Create/Update Routes
 
@@ -110,6 +112,17 @@ const StaffsShiftsRoute = StaffsShiftsImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const AppointmentsAppointmentIdRoute = AppointmentsAppointmentIdImport.update({
+  path: '/appointments/$appointmentId',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MedicalRecordsPatientsPatientIdRoute =
+  MedicalRecordsPatientsPatientIdImport.update({
+    path: '/medical-records/patients/$patientId',
+    getParentRoute: () => rootRoute,
+  } as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -140,6 +153,13 @@ declare module '@tanstack/react-router' {
       path: '/sign-in'
       fullPath: '/sign-in'
       preLoaderRoute: typeof SignInImport
+      parentRoute: typeof rootRoute
+    }
+    '/appointments/$appointmentId': {
+      id: '/appointments/$appointmentId'
+      path: '/appointments/$appointmentId'
+      fullPath: '/appointments/$appointmentId'
+      preLoaderRoute: typeof AppointmentsAppointmentIdImport
       parentRoute: typeof rootRoute
     }
     '/staffs/shifts': {
@@ -226,6 +246,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StaffsIndexImport
       parentRoute: typeof rootRoute
     }
+    '/medical-records/patients/$patientId': {
+      id: '/medical-records/patients/$patientId'
+      path: '/medical-records/patients/$patientId'
+      fullPath: '/medical-records/patients/$patientId'
+      preLoaderRoute: typeof MedicalRecordsPatientsPatientIdImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -235,6 +262,7 @@ export const routeTree = rootRoute.addChildren({
   IndexRoute,
   DashboardRoute,
   SignInRoute,
+  AppointmentsAppointmentIdRoute,
   StaffsShiftsRoute,
   AccountsIndexRoute,
   AnalyticsIndexRoute,
@@ -247,6 +275,7 @@ export const routeTree = rootRoute.addChildren({
   ServicesIndexRoute,
   ShiftWorkingsIndexRoute,
   StaffsIndexRoute,
+  MedicalRecordsPatientsPatientIdRoute,
 })
 
 /* prettier-ignore-end */
@@ -261,6 +290,7 @@ export const routeTree = rootRoute.addChildren({
         "/__layout",
         "/dashboard",
         "/sign-in",
+        "/appointments/$appointmentId",
         "/staffs/shifts",
         "/accounts/",
         "/analytics/",
@@ -272,7 +302,8 @@ export const routeTree = rootRoute.addChildren({
         "/rooms/",
         "/services/",
         "/shiftWorkings/",
-        "/staffs/"
+        "/staffs/",
+        "/medical-records/patients/$patientId"
       ]
     },
     "/": {
@@ -286,6 +317,9 @@ export const routeTree = rootRoute.addChildren({
     },
     "/sign-in": {
       "filePath": "sign-in.ts"
+    },
+    "/appointments/$appointmentId": {
+      "filePath": "appointments/$appointmentId.tsx"
     },
     "/staffs/shifts": {
       "filePath": "staffs/shifts.ts"
@@ -322,6 +356,9 @@ export const routeTree = rootRoute.addChildren({
     },
     "/staffs/": {
       "filePath": "staffs/index.ts"
+    },
+    "/medical-records/patients/$patientId": {
+      "filePath": "medical-records/patients/$patientId.tsx"
     }
   }
 }
