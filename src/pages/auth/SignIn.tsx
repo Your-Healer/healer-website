@@ -9,7 +9,7 @@ import { useNavigate } from "@tanstack/react-router"
 import { useSession } from "@/contexts/SessionProvider"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
-import hospitalImage from "@/assets/images/hospital.png"
+import hospitalImage from "@/assets/images/hospital.jpg"
 import logoImage from '@/assets/images/logo.png';
 import { AuthLoading, ButtonLoading } from "@/components/loading";
 

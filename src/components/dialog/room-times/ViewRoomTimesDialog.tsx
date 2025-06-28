@@ -104,7 +104,7 @@ export function ViewRoomTimesDialog({
 
         if (now > toTime) {
             return {
-                status: "completed",
+                status: "finished",
                 label: "Đã kết thúc",
                 color: "bg-gray-100 text-gray-800",
                 icon: CheckCircle,

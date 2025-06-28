@@ -27,7 +27,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog"
-import { Plus, Edit, Trash2, Search, RefreshCw } from "lucide-react"
+import { Plus, Edit, Trash2, Search, RefreshCw, Eye, ExternalLink } from "lucide-react"
 import { AppointmentWithDetails } from "@/models/models"
 import { useSession } from "@/contexts/SessionProvider"
 import { useGetAppointments } from "@/hooks/use-appointment"
@@ -47,7 +47,9 @@ import { useNavigate } from "@tanstack/react-router"
 export default function AppointmentManagement() {
     const { account, staff, isLoading, isAuthenticated } = useSession()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
     const [editingAppointment, setEditingAppointment] = useState<AppointmentWithDetails | null>(null)
+    const [viewingAppointment, setViewingAppointment] = useState<AppointmentWithDetails | null>(null)
     const [searchTerm, setSearchTerm] = useState("")
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("")
     const [staffFilter, setStaffFilter] = useState<string>("all")
@@ -115,6 +117,11 @@ export default function AppointmentManagement() {
     const handleEditAppointment = (appointment: AppointmentWithDetails) => {
         setEditingAppointment(appointment)
         setIsDialogOpen(true)
+    }
+
+    const handleViewAppointment = (appointment: AppointmentWithDetails) => {
+        setViewingAppointment(appointment)
+        setIsViewDialogOpen(true)
     }
 
     const handleDeleteAppointment = (id: string) => {
@@ -194,6 +201,13 @@ export default function AppointmentManagement() {
         departmentId: departmentFilter !== "all" ? departmentFilter : undefined,
         positionId: "1", // Assuming positionId "1" is for doctors
     })
+
+    const handleViewAppointmentDetails = (appointmentId: string) => {
+        navigate({
+            to: "/appointments/$appointmentId",
+            params: { appointmentId: appointmentId }
+        });
+    };
 
     return (
         <div className="flex h-screen bg-gray-50">
@@ -358,7 +372,7 @@ export default function AppointmentManagement() {
                         <CardContent className="space-y-4">
                             {getAppointmentsLoading ? (
                                 <TableLoading />
-                            ) :
+                            ) : (
                                 <>
                                     <Table>
                                         <TableHeader>
@@ -376,7 +390,15 @@ export default function AppointmentManagement() {
                                         <TableBody>
                                             {filteredAppointments?.map((appointment) => (
                                                 <TableRow key={appointment.id}>
-                                                    <TableCell className="font-medium">{`${appointment.patient.firstname} ${appointment.patient.lastname}`}</TableCell>
+                                                    <TableCell className="font-medium">
+                                                        <button
+                                                            onClick={() => handleViewAppointmentDetails(appointment.id)}
+                                                            className="text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors"
+                                                            title="Xem chi tiết lịch hẹn"
+                                                        >
+                                                            {`${appointment.patient.firstname} ${appointment.patient.lastname}`}
+                                                        </button>
+                                                    </TableCell>
                                                     <TableCell>{appointment.medicalRoom.name}</TableCell>
                                                     <TableCell>{appointment.medicalRoom.department.name}</TableCell>
                                                     <TableCell>{appointment.medicalRoom.service.name}</TableCell>
@@ -400,6 +422,23 @@ export default function AppointmentManagement() {
                                                     </TableCell>
                                                     <TableCell>
                                                         <div className="flex items-center gap-2">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => handleViewAppointmentDetails(appointment.id)}
+                                                                title="Xem chi tiết đầy đủ"
+                                                                className="text-blue-600 hover:text-blue-800"
+                                                            >
+                                                                <ExternalLink className="h-4 w-4" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => handleViewAppointment(appointment)}
+                                                                title="Xem thông tin cơ bản"
+                                                            >
+                                                                <Eye className="h-4 w-4" />
+                                                            </Button>
                                                             <Button variant="ghost" size="sm" onClick={() => handleEditAppointment(appointment)}>
                                                                 <Edit className="h-4 w-4" />
                                                             </Button>
@@ -469,11 +508,13 @@ export default function AppointmentManagement() {
                                             />
                                         )
                                     }
-                                </>}
 
+                                </>
+                            )}
                         </CardContent>
                     </Card>
 
+                    {/* Add/Edit Appointment Dialog */}
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogContent className="sm:max-w-[600px]">
                             <DialogHeader>
@@ -506,6 +547,216 @@ export default function AppointmentManagement() {
                                 <Button type="submit" onClick={() => setIsDialogOpen(false)}>
                                     {editingAppointment ? "Cập nhật" : "Đặt"} lịch hẹn
                                 </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+
+                    {/* View Appointment Detail Dialog */}
+                    <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+                        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                    Chi Tiết Lịch Hẹn
+                                    {viewingAppointment && (
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                setIsViewDialogOpen(false);
+                                                handleViewAppointmentDetails(viewingAppointment.id);
+                                            }}
+                                            className="ml-auto"
+                                        >
+                                            <ExternalLink className="h-4 w-4 mr-2" />
+                                            Xem chi tiết đầy đủ
+                                        </Button>
+                                    )}
+                                </DialogTitle>
+                                <DialogDescription>Thông tin chi tiết về lịch hẹn</DialogDescription>
+                            </DialogHeader>
+                            {viewingAppointment && (
+                                <div className="grid gap-6 py-4">
+                                    {/* Patient Information */}
+                                    <div className="space-y-3">
+                                        <h4 className="font-medium text-gray-900 border-b pb-1">Thông Tin Bệnh Nhân</h4>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <Label className="font-semibold text-sm">Họ và tên</Label>
+                                                <p className="text-sm">{`${viewingAppointment.patient.firstname} ${viewingAppointment.patient.lastname}`}</p>
+                                            </div>
+                                            <div>
+                                                <Label className="font-semibold text-sm">Số điện thoại</Label>
+                                                <p className="text-sm">{viewingAppointment.patient.phoneNumber || "Chưa có"}</p>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <Label className="font-semibold text-sm">Địa chỉ</Label>
+                                            <p className="text-sm">{viewingAppointment.patient.address || "Chưa có thông tin địa chỉ"}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Appointment Information */}
+                                    <div className="space-y-3">
+                                        <h4 className="font-medium text-gray-900 border-b pb-1">Thông Tin Lịch Hẹn</h4>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <Label className="font-semibold text-sm">Trạng thái</Label>
+                                                <div className="mt-1">
+                                                    <span
+                                                        className={`px-2 py-1 rounded-full text-xs ${viewingAppointment.status === APPOINTMENTSTATUS.PAID
+                                                            ? "bg-green-100 text-green-800"
+                                                            : viewingAppointment.status === APPOINTMENTSTATUS.IDLE
+                                                                ? "bg-yellow-100 text-yellow-800"
+                                                                : viewingAppointment.status === APPOINTMENTSTATUS.CANCEL
+                                                                    ? "bg-red-100 text-red-800"
+                                                                    : viewingAppointment.status === APPOINTMENTSTATUS.BOOKED
+                                                                        ? "bg-blue-100 text-blue-800"
+                                                                        : "bg-gray-100 text-gray-800"
+                                                            }`}
+                                                    >
+                                                        {getAppointmentStatusName(viewingAppointment.status)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <Label className="font-semibold text-sm">Thời gian bắt đầu</Label>
+                                                <p className="text-sm">{convertToVietnameseDate(viewingAppointment.bookingTime.medicalRoomTime.fromTime)}</p>
+                                            </div>
+                                            <div>
+                                                <Label className="font-semibold text-sm">Thời gian kết thúc</Label>
+                                                <p className="text-sm">{convertToVietnameseDate(viewingAppointment.bookingTime.medicalRoomTime.toTime)}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Medical Room Information */}
+                                    <div className="space-y-3">
+                                        <h4 className="font-medium text-gray-900 border-b pb-1">Thông Tin Phòng Khám</h4>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <Label className="font-semibold text-sm">Phòng khám</Label>
+                                                <p className="text-sm">{viewingAppointment.medicalRoom.name}</p>
+                                            </div>
+                                            <div>
+                                                <Label className="font-semibold text-sm">Tầng</Label>
+                                                <p className="text-sm">Tầng {viewingAppointment.medicalRoom.floor}</p>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <Label className="font-semibold text-sm">Khoa</Label>
+                                                <p className="text-sm">{viewingAppointment.medicalRoom.department.name}</p>
+                                            </div>
+                                            <div>
+                                                <Label className="font-semibold text-sm">Dịch vụ</Label>
+                                                <p className="text-sm">{viewingAppointment.medicalRoom.service.name}</p>
+                                            </div>
+                                        </div>
+                                        {viewingAppointment.medicalRoom.service.description && (
+                                            <div>
+                                                <Label className="font-semibold text-sm">Mô tả dịch vụ</Label>
+                                                <p className="text-sm">{viewingAppointment.medicalRoom.service.description}</p>
+                                            </div>
+                                        )}
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <Label className="font-semibold text-sm">Thời gian dự kiến</Label>
+                                                <p className="text-sm">{viewingAppointment.medicalRoom.service.durationTime} phút</p>
+                                            </div>
+                                            <div>
+                                                <Label className="font-semibold text-sm">Giá dịch vụ</Label>
+                                                <p className="text-sm font-medium text-green-600">
+                                                    {viewingAppointment.medicalRoom.service.price.toLocaleString('vi-VN')} VNĐ
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Diagnosis Suggestions */}
+                                    {viewingAppointment.suggestions && viewingAppointment.suggestions.length > 0 && (
+                                        <div className="space-y-3">
+                                            <h4 className="font-medium text-gray-900 border-b pb-1">Gợi Ý Chẩn Đoán</h4>
+                                            <div className="space-y-3">
+                                                {viewingAppointment.suggestions.map((suggestion, index) => (
+                                                    <div key={suggestion.id} className="p-3 bg-gray-50 rounded-lg">
+                                                        <div className="grid grid-cols-2 gap-4 mb-2">
+                                                            <div>
+                                                                <Label className="font-semibold text-sm">Bệnh</Label>
+                                                                <p className="text-sm">{suggestion.disease || "Chưa có"}</p>
+                                                            </div>
+                                                            <div>
+                                                                <Label className="font-semibold text-sm">Độ tin cậy</Label>
+                                                                <p className="text-sm">{(suggestion.confidence * 100).toFixed(1)}%</p>
+                                                            </div>
+                                                        </div>
+                                                        {suggestion.description && (
+                                                            <div>
+                                                                <Label className="font-semibold text-sm">Mô tả</Label>
+                                                                <p className="text-sm">{suggestion.description}</p>
+                                                            </div>
+                                                        )}
+                                                        <div className="mt-2 text-xs text-gray-500">
+                                                            {suggestion.suggestedByAI ? "Có gợi ý AI" : "Gợi ý thủ công"} -
+                                                            {convertToVietnameseDate(suggestion.createdAt)}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Status History */}
+                                    {viewingAppointment.statusLogs && viewingAppointment.statusLogs.length > 0 && (
+                                        <div className="space-y-3">
+                                            <h4 className="font-medium text-gray-900 border-b pb-1">Lịch Sử Trạng Thái</h4>
+                                            <div className="space-y-2">
+                                                {viewingAppointment.statusLogs
+                                                    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+                                                    .map((log, index) => (
+                                                        <div key={log.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                                            <div>
+                                                                <span className="text-sm font-medium">
+                                                                    {getAppointmentStatusName(log.status)}
+                                                                </span>
+                                                            </div>
+                                                            <div className="text-xs text-gray-500">
+                                                                {convertToVietnameseDate(log.updatedAt)}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            <DialogFooter>
+                                <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+                                    Đóng
+                                </Button>
+                                {viewingAppointment && (
+                                    <>
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => {
+                                                setIsViewDialogOpen(false);
+                                                handleViewAppointmentDetails(viewingAppointment.id);
+                                            }}
+                                        >
+                                            <ExternalLink className="h-4 w-4 mr-2" />
+                                            Chi tiết đầy đủ
+                                        </Button>
+                                        <Button
+                                            onClick={() => {
+                                                setIsViewDialogOpen(false)
+                                                handleEditAppointment(viewingAppointment)
+                                            }}
+                                        >
+                                            Chỉnh sửa
+                                        </Button>
+                                    </>
+                                )}
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
