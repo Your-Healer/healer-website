@@ -3,7 +3,11 @@ import { Header } from "@/components/layout/Header/Header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Users, UserCheck, Calendar, Building2, Stethoscope, Clock, Activity, TrendingUp, TrendingDown, DollarSign, Timer, Star, AlertCircle } from "lucide-react"
+import {
+    Users, UserCheck, Calendar, Building2, Stethoscope, Clock, Activity,
+    TrendingUp, TrendingDown, DollarSign, Timer, CreditCard, ChevronRight,
+    CheckCircle
+} from "lucide-react"
 import { Navigate, useNavigate } from "@tanstack/react-router"
 import { useSession } from "@/contexts/SessionProvider"
 import { DashboardLoading } from "@/components/loading"
@@ -11,12 +15,49 @@ import { useAdminDashboard } from "@/hooks/use-statistics"
 import { getAppointmentStatusName } from "@/utils/utils"
 import { APPOINTMENTSTATUS } from "@/utils/enum"
 import { convertToVietnameseDate } from "@/lib/utils"
-import { useEffect } from "react"
+import { useEffect, useState, useMemo } from "react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { format } from 'date-fns'
+import { vi } from 'date-fns/locale'
+
+// Dynamically import Recharts to avoid SSR issues
+import {
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+    ResponsiveContainer, LineChart, Line
+} from 'recharts'
 
 export default function AdminDashboard() {
     const { isAuthenticated, user, account, isLoading } = useSession();
     const navigate = useNavigate();
-    const { stats, recentAppointments, recentActivities, loading: dashboardLoading, refetch } = useAdminDashboard();
+    const { stats, loading: dashboardLoading, refetch } = useAdminDashboard();
+    const [chartView, setChartView] = useState<"appointments" | "revenue">("appointments");
+
+    // Translate month names to Vietnamese
+    const translatedAppointmentsData = useMemo(() => {
+        return stats.appointments.monthlyData.map(item => {
+            // Extract month number from the English month name
+            const monthIndex = new Date(`${item.month} 1, 2023`).getMonth();
+            // Format month in Vietnamese
+            const translatedMonth = format(new Date(2023, monthIndex, 1), 'MMMM', { locale: vi });
+            return {
+                ...item,
+                month: translatedMonth.charAt(0).toUpperCase() + translatedMonth.slice(1)
+            };
+        });
+    }, [stats.appointments.monthlyData]);
+
+    const translatedRevenueData = useMemo(() => {
+        return stats.revenue.monthlyData.map(item => {
+            // Extract month number from the English month name
+            const monthIndex = new Date(`${item.month} 1, 2023`).getMonth();
+            // Format month in Vietnamese
+            const translatedMonth = format(new Date(2023, monthIndex, 1), 'MMMM', { locale: vi });
+            return {
+                ...item,
+                month: translatedMonth.charAt(0).toUpperCase() + translatedMonth.slice(1)
+            };
+        });
+    }, [stats.revenue.monthlyData]);
 
     const handleCardClick = (href: string) => {
         try {
@@ -48,7 +89,6 @@ export default function AdminDashboard() {
             title: "Tổng Bệnh Nhân",
             value: stats.totalPatients.toLocaleString(),
             icon: UserCheck,
-            change: "+12%",
             href: "/patients",
             color: "text-blue-600",
             bgColor: "bg-blue-50"
@@ -57,16 +97,14 @@ export default function AdminDashboard() {
             title: "Nhân Viên Y Tế",
             value: stats.totalStaff.toString(),
             icon: Users,
-            change: "+3%",
             href: "/staff",
             color: "text-green-600",
             bgColor: "bg-green-50"
         },
         {
             title: "Lịch Hẹn Hôm Nay",
-            value: stats.todayAppointments.toString(),
+            value: stats.appointments.today.count.toString(),
             icon: Calendar,
-            change: "+8%",
             href: "/appointments",
             color: "text-purple-600",
             bgColor: "bg-purple-50"
@@ -75,7 +113,6 @@ export default function AdminDashboard() {
             title: "Khoa Khám",
             value: stats.totalDepartments.toString(),
             icon: Building2,
-            change: "0%",
             href: "/departments",
             color: "text-orange-600",
             bgColor: "bg-orange-50"
@@ -84,7 +121,6 @@ export default function AdminDashboard() {
             title: "Phòng Khám",
             value: stats.totalMedicalRooms.toString(),
             icon: Stethoscope,
-            change: "+5%",
             href: "/medical-rooms",
             color: "text-indigo-600",
             bgColor: "bg-indigo-50"
@@ -93,17 +129,31 @@ export default function AdminDashboard() {
 
     const performanceStats = [
         {
+            title: "Doanh Thu Tháng Này",
+            value: stats.revenue.monthly.toLocaleString() + " VNĐ",
+            subtitle: "tổng thu nhập",
+            icon: CreditCard,
+            color: "text-green-600"
+        },
+        {
+            title: "Doanh Thu Hôm Nay",
+            value: stats.revenue.today.toLocaleString() + " VNĐ",
+            subtitle: "đã thanh toán",
+            icon: DollarSign,
+            color: "text-blue-600"
+        },
+        {
             title: "Lịch Hẹn Hoàn Thành",
-            value: stats.completedAppointments.toLocaleString(),
+            value: stats.appointments.today.paid.toString(),
             subtitle: "tổng số lịch hẹn",
-            icon: UserCheck,
+            icon: CheckCircle,
             color: "text-green-600"
         },
         {
             title: "Lịch Hẹn Đang Chờ",
-            value: stats.pendingAppointments.toString(),
+            value: stats.appointments.today.idle.toString(),
             subtitle: "cần xử lý",
-            icon: AlertCircle,
+            icon: Clock,
             color: "text-orange-600"
         },
     ];
@@ -168,7 +218,6 @@ export default function AdminDashboard() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                         {mainStats.map((stat) => {
                             const Icon = stat.icon;
-                            const isPositive = stat.change.startsWith("+");
                             return (
                                 <Card
                                     key={stat.title}
@@ -186,20 +235,6 @@ export default function AdminDashboard() {
                                     <CardContent>
                                         <div className="text-2xl font-bold text-gray-900 mb-2">
                                             {stat.value}
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            {isPositive ? (
-                                                <TrendingUp className="h-3 w-3 text-green-600" />
-                                            ) : (
-                                                <TrendingDown className="h-3 w-3 text-red-600" />
-                                            )}
-                                            <span className={`text-xs font-medium ${isPositive ? "text-green-600" : "text-red-600"
-                                                }`}>
-                                                {stat.change}
-                                            </span>
-                                            <span className="text-xs text-gray-500 ml-1">
-                                                so với tháng trước
-                                            </span>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -234,14 +269,76 @@ export default function AdminDashboard() {
                         })}
                     </div>
 
+                    {/* Monthly Charts */}
+                    <Card className="mb-8">
+                        <CardHeader>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <CardTitle>Thống Kê Theo Tháng</CardTitle>
+                                    <CardDescription>
+                                        Biểu đồ thống kê hoạt động của bệnh viện
+                                    </CardDescription>
+                                </div>
+                                <Tabs value={chartView} onValueChange={(value) => setChartView(value as "appointments" | "revenue")}>
+                                    <TabsList>
+                                        <TabsTrigger value="appointments">Lịch hẹn</TabsTrigger>
+                                        <TabsTrigger value="revenue">Doanh thu</TabsTrigger>
+                                    </TabsList>
+                                </Tabs>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="h-[400px] w-full">
+                                {chartView === "appointments" ? (
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart
+                                            data={translatedAppointmentsData}
+                                            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                                        >
+                                            <CartesianGrid strokeDasharray="3 3" />
+                                            <XAxis dataKey="month" />
+                                            <YAxis />
+                                            <Tooltip
+                                                formatter={(value: any) => [`${value} lịch hẹn`, ""]}
+                                                labelFormatter={(label: any) => label}
+                                            />
+                                            <Legend />
+                                            <Bar dataKey="idle" name="Chờ xử lý" stackId="a" fill="#FFBB28" />
+                                            <Bar dataKey="booked" name="Đã đặt lịch" stackId="a" fill="#0088FE" />
+                                            <Bar dataKey="paid" name="Đã thanh toán" stackId="a" fill="#00C49F" />
+                                            <Bar dataKey="cancel" name="Đã hủy" stackId="a" fill="#FF8042" />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart
+                                            data={translatedRevenueData}
+                                            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                                        >
+                                            <CartesianGrid strokeDasharray="3 3" />
+                                            <XAxis dataKey="month" />
+                                            <YAxis />
+                                            <Tooltip
+                                                formatter={(value: any) => [`${value.toLocaleString()} VNĐ`, ""]}
+                                                labelFormatter={(label: any) => label}
+                                            />
+                                            <Legend />
+                                            <Bar dataKey="amount" name="Doanh thu" fill="#00C49F" />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
+
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Recent Appointments */}
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between">
                                 <div>
-                                    <CardTitle>Lịch Hẹn Gần Đây</CardTitle>
+                                    <CardTitle>Tình Trạng Lịch Hẹn Hôm Nay</CardTitle>
                                     <CardDescription>
-                                        Các lịch hẹn mới nhất trong hệ thống
+                                        Thống kê lịch hẹn trong ngày
                                     </CardDescription>
                                 </div>
                                 <Button
@@ -254,34 +351,69 @@ export default function AdminDashboard() {
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
-                                    {recentAppointments.length > 0 ? (
-                                        recentAppointments.slice(0, 5).map((appointment) => (
-                                            <div key={appointment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                                <div className="flex-1">
-                                                    <p className="font-medium text-gray-900">
-                                                        {`${appointment.patient.firstname} ${appointment.patient.lastname}`}
-                                                    </p>
-                                                    <p className="text-sm text-gray-600">
-                                                        {appointment.medicalRoom.name} - {appointment.medicalRoom.department.name}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500">
-                                                        {convertToVietnameseDate(appointment.bookingTime.medicalRoomTime.fromTime)}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500">
-                                                        {convertToVietnameseDate(appointment.bookingTime.medicalRoomTime.toTime)}
-                                                    </p>
-                                                </div>
-                                                <div className="ml-4">
-                                                    {getAppointmentStatusBadge(appointment.status)}
-                                                </div>
+                                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 rounded-full bg-blue-100">
+                                                <Calendar className="h-4 w-4 text-blue-600" />
                                             </div>
-                                        ))
-                                    ) : (
-                                        <div className="text-center py-8 text-gray-500">
-                                            <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                                            <p>Chưa có lịch hẹn nào</p>
+                                            <div>
+                                                <p className="font-medium text-gray-900">
+                                                    Đã đặt
+                                                </p>
+                                            </div>
                                         </div>
-                                    )}
+                                        <Badge variant="outline" className="bg-blue-100 text-blue-800">
+                                            {stats.appointments.today.booked}
+                                        </Badge>
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 rounded-full bg-yellow-100">
+                                                <Clock className="h-4 w-4 text-yellow-600" />
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-gray-900">
+                                                    Chờ xử lý
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <Badge variant="outline" className="bg-yellow-100 text-yellow-800">
+                                            {stats.appointments.today.idle}
+                                        </Badge>
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 rounded-full bg-green-100">
+                                                <CheckCircle className="h-4 w-4 text-green-600" />
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-gray-900">
+                                                    Hoàn thành
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <Badge variant="outline" className="bg-green-100 text-green-800">
+                                            {stats.appointments.today.paid}
+                                        </Badge>
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 rounded-full bg-red-100">
+                                                <Clock className="h-4 w-4 text-red-600" />
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-gray-900">
+                                                    Đã hủy
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <Badge variant="outline" className="bg-red-100 text-red-800">
+                                            {stats.appointments.today.cancel}
+                                        </Badge>
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -290,40 +422,76 @@ export default function AdminDashboard() {
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between">
                                 <div>
-                                    <CardTitle>Hoạt Động Hệ Thống</CardTitle>
+                                    <CardTitle>Tổng Doanh Thu</CardTitle>
                                     <CardDescription>
-                                        Các hoạt động gần đây trong hệ thống
+                                        Tổng quan doanh thu của bệnh viện
                                     </CardDescription>
                                 </div>
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => handleCardClick('/activity-logs')}
+                                    onClick={() => handleCardClick('/finance')}
                                 >
                                     Xem chi tiết
                                 </Button>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
-                                    {recentActivities.map((activity) => {
-                                        const Icon = getActivityIcon(activity.type);
-                                        const iconColor = getActivityColor(activity.type);
-                                        return (
-                                            <div key={activity.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                                <div className={`p-2 rounded-full bg-white ${iconColor}`}>
-                                                    <Icon className="h-4 w-4" />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <p className="font-medium text-sm text-gray-900">
-                                                        {activity.action}
-                                                    </p>
-                                                    <p className="text-xs text-gray-600">
-                                                        bởi {activity.user} • {activity.time}
-                                                    </p>
-                                                </div>
+                                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 rounded-full bg-green-100">
+                                                <DollarSign className="h-4 w-4 text-green-600" />
                                             </div>
-                                        );
-                                    })}
+                                            <div>
+                                                <p className="font-medium text-gray-900">
+                                                    Tổng doanh thu
+                                                </p>
+                                                <p className="text-xs text-gray-500">
+                                                    tính từ khi thành lập
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <p className="text-lg font-bold text-green-600">
+                                            {stats.revenue.total.toLocaleString()} VNĐ
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 rounded-full bg-blue-100">
+                                                <CreditCard className="h-4 w-4 text-blue-600" />
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-gray-900">
+                                                    Doanh thu tháng này
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-lg font-bold text-blue-600">
+                                                {stats.revenue.monthly.toLocaleString()} VNĐ
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 rounded-full bg-purple-100">
+                                                <Calendar className="h-4 w-4 text-purple-600" />
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-gray-900">
+                                                    Doanh thu hôm nay
+                                                </p>
+                                                <p className="text-xs text-gray-500">
+                                                    {new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <p className="text-lg font-bold text-purple-600">
+                                            {stats.revenue.today.toLocaleString()} VNĐ
+                                        </p>
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>

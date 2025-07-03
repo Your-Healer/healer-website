@@ -153,7 +153,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
         account,
         staff,
         isLoading,
-        isAuthenticated: !!user && !!account,
+        isAuthenticated: (!!user || !!staff) && !!account,
         login,
         logout,
         updateUser,

@@ -223,26 +223,71 @@ export interface CreateAppointmentRequest {
 export interface AdminDashboardStats {
 	totalPatients: number;
 	totalStaff: number;
-	totalAppointments: number;
-	todayAppointments: number;
 	totalDepartments: number;
 	totalMedicalRooms: number;
-	monthlyRevenue: number;
-	completedAppointments: number;
-	pendingAppointments: number;
-	cancelledAppointments: number;
-	averageWaitTime: number;
-	patientSatisfactionRate: number;
+	appointments: {
+		total: number;
+		today: {
+			count: number;
+			idle: number;
+			booked: number;
+			paid: number;
+			cancel: number;
+			finished: number;
+		};
+		monthlyData: {
+			month: string;
+			count: number;
+			idle: number;
+			booked: number;
+			paid: number;
+			cancel: number;
+			finished: number;
+		}[];
+	};
+	revenue: {
+		total: number;
+		today: number;
+		monthly: number;
+		monthlyData: {
+			month: string;
+			amount: number;
+		}[];
+	};
 }
 
 export interface DoctorDashboardStats {
-	todayAppointments: number;
-	upcomingAppointments: number;
-	completedToday: number;
-	totalPatients: number;
-	averageConsultationTime: number;
-	currentShifts: number;
-	weeklyHours: number;
+	appointments: {
+		total: number;
+		today: {
+			count: number;
+			idle: number;
+			booked: number;
+			paid: number;
+			cancel: number;
+			finished: number;
+		};
+		monthlyData: {
+			month: string;
+			count: number;
+			idle: number;
+			booked: number;
+			paid: number;
+			cancel: number;
+			finished: number;
+		}[];
+	};
+	shifts: {
+		total: number;
+		monthlyData: {
+			month: string;
+			count: number;
+		}[];
+		weeklyHours: {
+			week: string;
+			hours: number;
+		};
+	};
 }
 
 export interface RecentActivity {
