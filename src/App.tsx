@@ -5,6 +5,7 @@ import type { FunctionComponent } from "./common/types";
 import { SessionProvider } from "./contexts/SessionProvider";
 // import { TanStackRouterDevelopmentTools } from "./components/utils/development-tools/TanStackRouterDevelopmentTools";
 import { Toaster } from "@/components/ui/sonner"
+import ChatbotComponent from "@/components/chatbot/Chatbot";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = ({ router }: AppProps): FunctionComponent => {
 				<ReactQueryDevtools initialIsOpen={false} /> */}
 				<Toaster position="bottom-right" richColors />
 				<RouterProvider router={router} />
+				<ChatbotComponent />
 			</SessionProvider>
 		</QueryClientProvider>
 	);

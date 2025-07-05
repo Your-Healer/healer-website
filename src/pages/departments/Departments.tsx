@@ -698,7 +698,7 @@ export default function DepartmentManagement() {
                                                                                     <div className="flex flex-wrap gap-1 mt-1">
                                                                                         {assignment.staff.positions.map((pos, posIndex) => (
                                                                                             <Badge key={posIndex} variant="secondary" className="text-xs">
-                                                                                                {pos.position?.name || `Position ID: ${pos.positionId}`}
+                                                                                                {pos.position?.name || "Không xác định"}
                                                                                             </Badge>
                                                                                         ))}
                                                                                     </div>

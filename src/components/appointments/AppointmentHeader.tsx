@@ -32,11 +32,6 @@ export function AppointmentHeader({ onBack, onRefresh, appointmentId }: Appointm
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Làm mới
                     </Button>
-                    {appointmentId && (
-                        <Badge variant="outline" className="gap-2">
-                            ID: {appointmentId}
-                        </Badge>
-                    )}
                 </div>
             </div>
         </div>

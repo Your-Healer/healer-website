@@ -391,3 +391,21 @@ export interface BlockchainResponse<T> {
 	message?: string;
 	timestamp: string;
 }
+
+/* ----------------------------------- Rag ---------------------------------- */
+export interface RagRelatedQuestion {
+	question: string;
+	related_diseases: string[];
+}
+
+export interface CommonQuestion {
+	question: string;
+	answer?: string;
+}
+
+export interface RagParsedDiseaseData {
+	disease_id: string;
+	disease_name: string;
+	section?: string;
+	common_questions?: CommonQuestion[];
+}
