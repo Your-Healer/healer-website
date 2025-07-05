@@ -11,16 +11,14 @@ import { Navigate, useNavigate } from "@tanstack/react-router"
 import { useSession } from "@/contexts/SessionProvider"
 import { DashboardLoading } from "@/components/loading"
 import { useDoctorDashboard } from "@/hooks/use-statistics"
-import { getAppointmentStatusName } from "@/utils/utils"
 import { APPOINTMENTSTATUS } from "@/utils/enum"
 import { useEffect, useState, useMemo } from "react"
-import { AppointmentWithDetails, ShiftWorkingDetails } from "@/models/models"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-    ResponsiveContainer, LineChart, Line
+    ResponsiveContainer
 } from 'recharts'
 
 export default function DoctorDashboard() {

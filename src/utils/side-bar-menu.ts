@@ -130,6 +130,14 @@ export const staffMenuItems: MenuItem[] = [
 		category: "medical",
 	},
 	{
+		href: "/medical-records",
+		label: "Hồ sơ bệnh án",
+		icon: ClipboardPlus,
+		role: "2",
+		positions: ["1"],
+		category: "medical",
+	},
+	{
 		href: "/shifts",
 		label: "Quản lý ca trực",
 		icon: Clock,
@@ -145,12 +153,4 @@ export const staffMenuItems: MenuItem[] = [
 		positions: ["1", "3", "4"],
 		category: "operations",
 	},
-	// {
-	// 	href: "/analytics",
-	// 	label: "Phân tích & Báo cáo",
-	// 	icon: BarChart3,
-	// 	role: "2",
-	// 	positions: ["1", "3", "4"],
-	// 	category: "reports",
-	// },
 ];

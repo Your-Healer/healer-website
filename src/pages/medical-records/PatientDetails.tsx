@@ -222,9 +222,6 @@ export default function PatientDetailsPage() {
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <Badge variant="secondary" className="mb-2">
-                                        ID: {patient.patientId}
-                                    </Badge>
                                     <div className="text-sm text-gray-600">
                                         <div className="flex items-center gap-1">
                                             <Shield className="h-3 w-3" />
