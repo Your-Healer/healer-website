@@ -317,13 +317,13 @@ export interface BlockchainClinicalTestWithDetails {
 	testId: string;
 	patientId: string;
 	doctorId: string;
-	doctor: AccountWithDetails;
+	doctorAccount: AccountWithDetails;
 	testType: string;
 	testDate: string; // timestamp
 	result: string;
 	notes: string;
 	createdAt: string;
-	createBy: string;
+	createdBy: string;
 	createByAccount: AccountWithDetails;
 	lastModifiedAt: string; // block number
 	lastModifiedBy: string; // modifier's wallet address
@@ -339,7 +339,7 @@ export interface BlockchainDiseaseProgressionWithDetails {
 	progressionId: string;
 	patientId: string;
 	doctorId: string;
-	doctor: AccountWithDetails;
+	doctorAccount: AccountWithDetails;
 	visitDate: string;
 	symptoms: string;
 	diagnosis: string;
@@ -347,7 +347,7 @@ export interface BlockchainDiseaseProgressionWithDetails {
 	prescription: string;
 	nextAppointment: string; // timestamp
 	createdAt: string;
-	createBy: string;
+	createdBy: string;
 	createByAccount: AccountWithDetails;
 	lastModifiedAt: string; // block number
 	lastModifiedBy: string; // modifier's wallet address
@@ -369,7 +369,7 @@ export interface BlockchainMedicalRecordWithDetails {
 	diagnosis: string;
 	treatment: string;
 	createdAt: string;
-	createBy: string;
+	createdBy: string;
 	createByAccount: AccountWithDetails;
 	lastModifiedAt: string; // block number
 	lastModifiedBy: string; // modifier's wallet address

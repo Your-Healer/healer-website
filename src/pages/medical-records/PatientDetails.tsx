@@ -34,8 +34,12 @@ import {
     RefreshCw,
     Edit,
     Eye,
-    Plus
+    Plus,
+    Trash2
 } from "lucide-react";
+import PatientActionButtons from "@/components/medical-records/PatientActionButtons";
+import MedicalActions, { ActionType } from "@/components/medical-records/MedicalActions";
+import { formatBlockchainTimestamp, formatWalletAddress, formatBlockHash } from "@/utils/blockchain-helpers";
 import {
     useGetBlockchainPatientsById,
     useGetBlockchainPatientClinicalTests,
@@ -61,11 +65,14 @@ export default function PatientDetailsPage() {
     const [selectedTest, setSelectedTest] = useState<any>(null);
     const [selectedProgression, setSelectedProgression] = useState<any>(null);
     const [selectedRecord, setSelectedRecord] = useState<any>(null);
+    const [actionType, setActionType] = useState<ActionType | null>(null);
+    const [actionData, setActionData] = useState<any>(null);
     const navigate = useNavigate();
 
     // Fetch patient data
     const { patient, loading: patientLoading, error: patientError, refetch: refetchPatient } = useGetBlockchainPatientsById(patientId as string);
     const { clinicalTests, loading: testsLoading, refetch: refetchTests } = useGetBlockchainPatientClinicalTests(patientId as string);
+
     const { diseaseProgressions, loading: progressionsLoading, refetch: refetchProgressions } = useGetBlockchainPatientDiseaseProgressions(patientId as string);
     const { patientMedicalRecords, loading: recordsLoading, refetch: refetchRecords } = useGetBlockchainPatientMedicalRecords(patientId as string);
 
@@ -209,7 +216,7 @@ export default function PatientDetailsPage() {
                                         <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
                                             <span className="flex items-center gap-1">
                                                 <Calendar className="h-3 w-3" />
-                                                {formatTimestamp(patient.dateOfBirth)}
+                                                {formatBlockchainTimestamp(patient.dateOfBirth)}
                                             </span>
                                             <Badge variant="outline">{patient.gender}</Badge>
                                             {patient.phoneNumber && (
@@ -229,6 +236,27 @@ export default function PatientDetailsPage() {
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+
+                            {/* Patient Action Buttons */}
+                            <div className="mt-4">
+                                <PatientActionButtons
+                                    patientId={parseInt(patientId as string)}
+                                    patientData={{
+                                        patientId: patient.patientId,
+                                        patientName: patient.patientName,
+                                        dateOfBirth: patient.dateOfBirth,
+                                        gender: patient.gender,
+                                        address: patient.address,
+                                        phoneNumber: patient.phoneNumber,
+                                        emergencyContact: patient.emergencyContact
+                                    }}
+                                    onSuccess={handleRefreshAll}
+                                    diseaseProgressions={diseaseProgressions.map(prog => ({
+                                        id: prog.progressionId,
+                                        diagnosis: prog.diagnosis
+                                    }))}
+                                />
                             </div>
                         </CardHeader>
                         <CardContent>
@@ -457,7 +485,13 @@ export default function PatientDetailsPage() {
                                         <div className="space-y-4">
                                             <div className="flex items-center justify-between">
                                                 <h3 className="text-lg font-semibold">Kết quả xét nghiệm</h3>
-                                                <Button size="sm">
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        setActionType(ActionType.CreateClinicalTest);
+                                                        setActionData(null);
+                                                    }}
+                                                >
                                                     <Plus className="h-4 w-4 mr-2" />
                                                     Thêm xét nghiệm
                                                 </Button>
@@ -479,8 +513,8 @@ export default function PatientDetailsPage() {
                                                                     </div>
                                                                     <p className="text-sm mb-2 line-clamp-2">{test.result}</p>
                                                                     <div className="text-xs text-gray-500">
-                                                                        Bác sĩ: {test.doctor ?
-                                                                            `${test.doctor.staff?.firstname || test.doctor.user?.firstname || ''} ${test.doctor.staff?.lastname || test.doctor.user?.lastname || ''}`.trim() || 'Không có tên'
+                                                                        Bác sĩ: {test.doctorAccount ?
+                                                                            `${test.doctorAccount.staff?.firstname || test.doctorAccount.user?.firstname || ''} ${test.doctorAccount.staff?.lastname || test.doctorAccount.user?.lastname || ''}`.trim() || 'Không có tên'
                                                                             : 'Không có tên'
                                                                         }
                                                                     </div>
@@ -493,8 +527,34 @@ export default function PatientDetailsPage() {
                                                                     >
                                                                         <Eye className="h-4 w-4" />
                                                                     </Button>
-                                                                    <Button variant="ghost" size="sm">
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => {
+                                                                            setActionType(ActionType.UpdateClinicalTest);
+                                                                            setActionData({
+                                                                                testId: test.testId,
+                                                                                testType: test.testType,
+                                                                                testDate: test.testDate,
+                                                                                result: test.result,
+                                                                                notes: test.notes
+                                                                            });
+                                                                        }}
+                                                                    >
                                                                         <Edit className="h-4 w-4" />
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => {
+                                                                            setActionType(ActionType.DeleteClinicalTest);
+                                                                            setActionData({
+                                                                                testId: test.testId,
+                                                                                testType: test.testType
+                                                                            });
+                                                                        }}
+                                                                    >
+                                                                        <Trash2 className="h-4 w-4 text-red-500" />
                                                                     </Button>
                                                                 </div>
                                                             </div>
@@ -510,7 +570,12 @@ export default function PatientDetailsPage() {
                                             <p className="text-gray-500 mb-4">
                                                 Bệnh nhân chưa có kết quả xét nghiệm nào.
                                             </p>
-                                            <Button>
+                                            <Button
+                                                onClick={() => {
+                                                    setActionType(ActionType.CreateClinicalTest);
+                                                    setActionData(null);
+                                                }}
+                                            >
                                                 <Plus className="h-4 w-4 mr-2" />
                                                 Thêm xét nghiệm đầu tiên
                                             </Button>
@@ -525,51 +590,90 @@ export default function PatientDetailsPage() {
                                         <div className="space-y-4">
                                             <div className="flex items-center justify-between">
                                                 <h3 className="text-lg font-semibold">Tiến triển bệnh</h3>
-                                                <Button size="sm">
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        setActionType(ActionType.CreateDiseaseProgression);
+                                                        setActionData(null);
+                                                    }}
+                                                >
                                                     <Plus className="h-4 w-4 mr-2" />
                                                     Thêm tiến triển
                                                 </Button>
                                             </div>
                                             <div className="grid gap-4">
-                                                {diseaseProgressions.map((progression, index) => (
-                                                    <Card key={index} className="hover:shadow-md transition-shadow">
-                                                        <CardContent className="p-4">
-                                                            <div className="flex items-center justify-between">
-                                                                <div className="flex-1">
-                                                                    <div className="flex items-center gap-3 mb-2">
-                                                                        <Badge variant="outline" className="gap-1">
-                                                                            <Stethoscope className="h-3 w-3" />
-                                                                            {progression.diagnosis}
-                                                                        </Badge>
-                                                                        <span className="text-sm text-gray-500">
-                                                                            {formatTimestamp(progression.visitDate)}
-                                                                        </span>
+                                                {diseaseProgressions.map((progression, index) => {
+                                                    // console.log(progression.doctorAccount ?
+                                                    //     `${progression.doctorAccount.staff?.firstname || progression.doctorAccount.user?.firstname || ''} ${progression.doctorAccount.staff?.lastname || progression.doctorAccount.user?.lastname || ''}`.trim() || 'Không có tên'
+                                                    //     : 'Không có tên')
+                                                    return (
+                                                        <Card key={index} className="hover:shadow-md transition-shadow">
+                                                            <CardContent className="p-4">
+                                                                <div className="flex items-center justify-between">
+                                                                    <div className="flex-1">
+                                                                        <div className="flex items-center gap-3 mb-2">
+                                                                            <Badge variant="outline" className="gap-1">
+                                                                                <Stethoscope className="h-3 w-3" />
+                                                                                {progression.diagnosis}
+                                                                            </Badge>
+                                                                            <span className="text-sm text-gray-500">
+                                                                                {formatTimestamp(progression.visitDate)}
+                                                                            </span>
+                                                                        </div>
+                                                                        <p className="text-sm mb-1"><strong>Triệu chứng:</strong> {progression.symptoms}</p>
+                                                                        <p className="text-sm mb-2 line-clamp-1"><strong>Điều trị:</strong> {progression.treatment}</p>
+                                                                        <div className="text-xs text-gray-500">
+                                                                            Bác sĩ: {progression.doctorAccount ?
+                                                                                `${progression.doctorAccount.staff?.firstname || progression.doctorAccount.user?.firstname || ''} ${progression.doctorAccount.staff?.lastname || progression.doctorAccount.user?.lastname || ''}`.trim() || 'Không có tên'
+                                                                                : 'Không có tên'
+                                                                            }
+                                                                        </div>
                                                                     </div>
-                                                                    <p className="text-sm mb-1"><strong>Triệu chứng:</strong> {progression.symptoms}</p>
-                                                                    <p className="text-sm mb-2 line-clamp-1"><strong>Điều trị:</strong> {progression.treatment}</p>
-                                                                    <div className="text-xs text-gray-500">
-                                                                        Bác sĩ: {progression.doctor ?
-                                                                            `${progression.doctor.staff?.firstname || progression.doctor.user?.firstname || ''} ${progression.doctor.staff?.lastname || progression.doctor.user?.lastname || ''}`.trim() || 'Không có tên'
-                                                                            : 'Không có tên'
-                                                                        }
+                                                                    <div className="flex gap-2">
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            onClick={() => setSelectedProgression(progression)}
+                                                                        >
+                                                                            <Eye className="h-4 w-4" />
+                                                                        </Button>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            onClick={() => {
+                                                                                setActionType(ActionType.UpdateDiseaseProgression);
+                                                                                setActionData({
+                                                                                    progressionId: progression.progressionId,
+                                                                                    visitDate: progression.visitDate,
+                                                                                    symptoms: progression.symptoms,
+                                                                                    diagnosis: progression.diagnosis,
+                                                                                    treatment: progression.treatment,
+                                                                                    prescription: progression.prescription,
+                                                                                    nextAppointment: progression.nextAppointment
+                                                                                });
+                                                                            }}
+                                                                        >
+                                                                            <Edit className="h-4 w-4" />
+                                                                        </Button>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            onClick={() => {
+                                                                                setActionType(ActionType.DeleteDiseaseProgression);
+                                                                                setActionData({
+                                                                                    progressionId: progression.progressionId,
+                                                                                    diagnosis: progression.diagnosis
+                                                                                });
+                                                                            }}
+                                                                        >
+                                                                            <Trash2 className="h-4 w-4 text-red-500" />
+                                                                        </Button>
                                                                     </div>
                                                                 </div>
-                                                                <div className="flex gap-2">
-                                                                    <Button
-                                                                        variant="ghost"
-                                                                        size="sm"
-                                                                        onClick={() => setSelectedProgression(progression)}
-                                                                    >
-                                                                        <Eye className="h-4 w-4" />
-                                                                    </Button>
-                                                                    <Button variant="ghost" size="sm">
-                                                                        <Edit className="h-4 w-4" />
-                                                                    </Button>
-                                                                </div>
-                                                            </div>
-                                                        </CardContent>
-                                                    </Card>
-                                                ))}
+                                                            </CardContent>
+                                                        </Card>
+                                                    )
+                                                })}
                                             </div>
                                         </div>
                                     ) : (
@@ -579,7 +683,12 @@ export default function PatientDetailsPage() {
                                             <p className="text-gray-500 mb-4">
                                                 Chưa có thông tin tiến triển bệnh của bệnh nhân.
                                             </p>
-                                            <Button>
+                                            <Button
+                                                onClick={() => {
+                                                    setActionType(ActionType.CreateDiseaseProgression);
+                                                    setActionData(null);
+                                                }}
+                                            >
                                                 <Plus className="h-4 w-4 mr-2" />
                                                 Thêm tiến triển đầu tiên
                                             </Button>
@@ -594,7 +703,13 @@ export default function PatientDetailsPage() {
                                         <div className="space-y-4">
                                             <div className="flex items-center justify-between">
                                                 <h3 className="text-lg font-semibold">Hồ sơ bệnh án</h3>
-                                                <Button size="sm">
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        setActionType(ActionType.CreateMedicalRecord);
+                                                        setActionData(null);
+                                                    }}
+                                                >
                                                     <Plus className="h-4 w-4 mr-2" />
                                                     Thêm hồ sơ
                                                 </Button>
@@ -648,7 +763,12 @@ export default function PatientDetailsPage() {
                                             <p className="text-gray-500 mb-4">
                                                 Bệnh nhân chưa có hồ sơ bệnh án nào.
                                             </p>
-                                            <Button>
+                                            <Button
+                                                onClick={() => {
+                                                    setActionType(ActionType.CreateMedicalRecord);
+                                                    setActionData(null);
+                                                }}
+                                            >
                                                 <Plus className="h-4 w-4 mr-2" />
                                                 Tạo hồ sơ đầu tiên
                                             </Button>
@@ -696,10 +816,13 @@ export default function PatientDetailsPage() {
                                         <div>
                                             <Label className="font-semibold text-sm">Bác sĩ thực hiện</Label>
                                             <p className="text-sm">
-                                                {selectedTest.doctor ?
-                                                    `${selectedTest.doctor.staff?.firstname || selectedTest.doctor.user?.firstname || ''} ${selectedTest.doctor.staff?.lastname || selectedTest.doctor.user?.lastname || ''}`.trim() || 'Không có tên'
+                                                {selectedTest.doctorAccount ?
+                                                    `${selectedTest.doctorAccount.staff?.firstname || selectedTest.doctorAccount.user?.firstname || ''} ${selectedTest.doctorAccount.staff?.lastname || selectedTest.doctorAccount.user?.lastname || ''}`.trim() || 'Không có tên'
                                                     : 'Không có tên'
                                                 }
+                                            </p>
+                                            <p className="text-xs text-gray-500 font-mono">
+                                                {formatWalletAddress(selectedTest.createdBy)}
                                             </p>
                                         </div>
                                     </div>
@@ -767,10 +890,13 @@ export default function PatientDetailsPage() {
                                         <div>
                                             <Label className="font-semibold text-sm">Bác sĩ điều trị</Label>
                                             <p className="text-sm">
-                                                {selectedProgression.doctor ?
-                                                    `${selectedProgression.doctor.staff?.firstname || selectedProgression.doctor.user?.firstname || ''} ${selectedProgression.doctor.staff?.lastname || selectedProgression.doctor.user?.lastname || ''}`.trim() || 'Không có tên'
+                                                {selectedProgression.doctorAccount ?
+                                                    `${selectedProgression.doctorAccount.staff?.firstname || selectedProgression.doctorAccount.user?.firstname || ''} ${selectedProgression.doctorAccount.staff?.lastname || selectedProgression.doctorAccount.user?.lastname || ''}`.trim() || 'Không có tên'
                                                     : 'Không có tên'
                                                 }
+                                            </p>
+                                            <p className="text-xs text-gray-500 font-mono">
+                                                {formatWalletAddress(selectedProgression.createdBy)}
                                             </p>
                                         </div>
                                     </div>
@@ -835,7 +961,7 @@ export default function PatientDetailsPage() {
                                                         }
                                                     </p>
                                                     <p className="text-xs text-gray-500 font-mono">
-                                                        {formatWalletAddress(selectedRecord.createBy)}
+                                                        {formatWalletAddress(selectedRecord.createdBy)}
                                                     </p>
                                                 </div>
                                                 <div>
@@ -849,6 +975,26 @@ export default function PatientDetailsPage() {
                             )}
                         </DialogContent>
                     </Dialog>
+
+                    {/* Medical Actions Component for handling all forms and confirmations */}
+                    <MedicalActions
+                        actionType={actionType}
+                        patientId={parseInt(patientId as string)}
+                        data={actionData}
+                        onClose={() => {
+                            setActionType(null);
+                            setActionData(null);
+                        }}
+                        onSuccess={() => {
+                            handleRefreshAll();
+                            setActionType(null);
+                            setActionData(null);
+                        }}
+                        diseaseProgressions={diseaseProgressions.map(prog => ({
+                            id: prog.progressionId,
+                            diagnosis: prog.diagnosis
+                        }))}
+                    />
                 </main>
             </div>
         </div>

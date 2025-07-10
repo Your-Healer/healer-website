@@ -89,6 +89,8 @@ export default function ClinicalTestsManagement() {
     const endIndex = startIndex + itemsPerPage
     const currentTests = filteredTests.slice(startIndex, endIndex)
 
+    console.log(currentTests)
+
     const handlePageChange = (page: number) => {
         setCurrentPage(page)
     }
@@ -256,8 +258,8 @@ export default function ClinicalTestsManagement() {
                                     <TableCell>
                                         <div className="text-sm">
                                             <div className="font-medium">
-                                                {test.doctor ?
-                                                    `${test.doctor.staff?.firstname || test.doctor.user?.firstname || ''} ${test.doctor.staff?.lastname || test.doctor.user?.lastname || ''}`.trim() || 'Không có tên'
+                                                {test.doctorAccount ?
+                                                    `${test.doctorAccount.staff?.firstname || test.doctorAccount.user?.firstname || ''} ${test.doctorAccount.staff?.lastname || test.doctorAccount.user?.lastname || ''}`.trim() || 'Không có tên'
                                                     : 'Không có tên'
                                                 }
                                             </div>
@@ -353,8 +355,8 @@ export default function ClinicalTestsManagement() {
                                 <div>
                                     <Label className="font-semibold text-sm">Bác sĩ thực hiện</Label>
                                     <p className="text-sm">
-                                        {viewingTest.doctor ?
-                                            `${viewingTest.doctor.staff?.firstname || viewingTest.doctor.user?.firstname || ''} ${viewingTest.doctor.staff?.lastname || viewingTest.doctor.user?.lastname || ''}`.trim() || 'Không có tên'
+                                        {viewingTest.doctorAccount ?
+                                            `${viewingTest.doctorAccount.staff?.firstname || viewingTest.doctorAccount.user?.firstname || ''} ${viewingTest.doctorAccount.staff?.lastname || viewingTest.doctorAccount.user?.lastname || ''}`.trim() || 'Không có tên'
                                             : 'Không có tên'
                                         }
                                     </p>
